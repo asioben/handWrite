@@ -9,7 +9,7 @@ import numpy as np
 import sys
 
 #dependacies
-import model
+import nn
 
 #const
 HEIGHT = 600
@@ -21,10 +21,12 @@ def getSquaredPosition(pos,translation):
     for i in range(0,2):
      if(pos[i] < translation[i] or pos[i] >= translation[i] + (28 * SQUARE_SIZE)):
          pos = [-1,-1]
-         return pos
+         return 
+     
      pos[i] -= translation[i]
      pos[i] = pos[i] - (pos[i]%SQUARE_SIZE)
      pos[i] += translation[i]
+
     return pos
 
 #draw the grid
@@ -32,13 +34,16 @@ def drawGrid(renderer):
         number_of_squares = 28
         translation_x = (WIDTH//2)-((number_of_squares*SQUARE_SIZE)//2)
         translation_y = 50
+
         for i in range(0,(number_of_squares+1)):
           begin_vertical = ((i*SQUARE_SIZE)+translation_x,translation_y)
           end_vertical = ((i*SQUARE_SIZE)+translation_x,((number_of_squares)*SQUARE_SIZE)+translation_y)
           begin_horizontal = (translation_x,(i*SQUARE_SIZE)+translation_y)
           end_horizontal = (((number_of_squares)*SQUARE_SIZE) + translation_x,(i*SQUARE_SIZE)+translation_y)
+
           pygame.draw.line(renderer,(0,0,0),(begin_horizontal),(end_horizontal),1)
           pygame.draw.line(renderer,(0,0,0),(begin_vertical),(end_vertical),1)
+
           """if i == 1:
               i = number_of_squares 
           begin_vertical = ((i*SQUARE_SIZE)+translation_x,translation_y)
@@ -47,6 +52,7 @@ def drawGrid(renderer):
           end_horizontal = (((number_of_squares)*SQUARE_SIZE) + translation_x,(i*SQUARE_SIZE)+translation_y)
           pygame.draw.line(renderer,(0,0,0),begin_horizontal,end_horizontal,1)
           pygame.draw.line(renderer,(0,0,0),begin_vertical,end_vertical,1)"""
+
         translation = [translation_x,translation_y]
         return translation
 
@@ -84,7 +90,7 @@ def main():
     squares = []
 
     #load the neural network
-    network = model.load_network("model.json")
+    network = nn.load_network("model.json")
 
     #the canvas you drew
     pixels = np.zeros((784,1))
@@ -113,10 +119,12 @@ def main():
      renderer.fill((255,255,255))
      translation  = drawGrid(renderer)
      mouseEvents = pygame.mouse.get_pressed()
+
      if(mouseEvents[0] == True):
         mousePos = pygame.mouse.get_pos()
         mousePos = getSquaredPosition(list(mousePos),translation)
         startPos = [mousePos[0] - (SQUARE_SIZE), mousePos[1] - (SQUARE_SIZE)]
+
         if(mousePos[0] != -1): 
             #squares.append(pygame.Rect(mousePos[0],mousePos[1],SQUARE_SIZE,SQUARE_SIZE))
             for i in range(9):
@@ -131,11 +139,14 @@ def main():
                 ):
                     print(":"+ str(translation[0]) + "," + str(pos[1]))
                     squares.append(pygame.Rect(pos[0],pos[1],SQUARE_SIZE,SQUARE_SIZE))
+
      elif(mouseEvents[2] == True):
         mousePos = pygame.mouse.get_pos()
         mousePos = getSquaredPosition(list(mousePos),translation)
+
         if(mousePos[0] != -1): 
             findSquare(mousePos,squares)
+
      for square in squares:
         pygame.draw.rect(renderer,(0,0,0),square,0)
      pygame.display.update()
