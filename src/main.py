@@ -32,13 +32,21 @@ def drawGrid(renderer):
         number_of_squares = 28
         translation_x = (WIDTH//2)-((number_of_squares*SQUARE_SIZE)//2)
         translation_y = 50
-        for i in range(0,number_of_squares+1):
+        for i in range(0,(number_of_squares+1)):
           begin_vertical = ((i*SQUARE_SIZE)+translation_x,translation_y)
           end_vertical = ((i*SQUARE_SIZE)+translation_x,((number_of_squares)*SQUARE_SIZE)+translation_y)
           begin_horizontal = (translation_x,(i*SQUARE_SIZE)+translation_y)
           end_horizontal = (((number_of_squares)*SQUARE_SIZE) + translation_x,(i*SQUARE_SIZE)+translation_y)
           pygame.draw.line(renderer,(0,0,0),(begin_horizontal),(end_horizontal),1)
           pygame.draw.line(renderer,(0,0,0),(begin_vertical),(end_vertical),1)
+          """if i == 1:
+              i = number_of_squares 
+          begin_vertical = ((i*SQUARE_SIZE)+translation_x,translation_y)
+          end_vertical = ((i*SQUARE_SIZE)+translation_x,((number_of_squares)*SQUARE_SIZE)+translation_y)
+          begin_horizontal = (translation_x,(i*SQUARE_SIZE)+translation_y)
+          end_horizontal = (((number_of_squares)*SQUARE_SIZE) + translation_x,(i*SQUARE_SIZE)+translation_y)
+          pygame.draw.line(renderer,(0,0,0),begin_horizontal,end_horizontal,1)
+          pygame.draw.line(renderer,(0,0,0),begin_vertical,end_vertical,1)"""
         translation = [translation_x,translation_y]
         return translation
 
@@ -61,6 +69,7 @@ def create_input(pixels,squares,translation):
         pixel = row + (28 * column)
         pixels[pixel] = 1.0
     return pixels
+
 
 #main function
 def main():
@@ -97,6 +106,9 @@ def main():
                 #print(pixels)
                 #print("/////////////////////////////")
                 print(output)
+            if event.key == pygame.K_BACKSPACE:
+                squares = []
+            
     
      renderer.fill((255,255,255))
      translation  = drawGrid(renderer)
@@ -104,8 +116,21 @@ def main():
      if(mouseEvents[0] == True):
         mousePos = pygame.mouse.get_pos()
         mousePos = getSquaredPosition(list(mousePos),translation)
+        startPos = [mousePos[0] - (SQUARE_SIZE), mousePos[1] - (SQUARE_SIZE)]
         if(mousePos[0] != -1): 
-            squares.append(pygame.Rect(mousePos[0],mousePos[1],SQUARE_SIZE,SQUARE_SIZE))
+            #squares.append(pygame.Rect(mousePos[0],mousePos[1],SQUARE_SIZE,SQUARE_SIZE))
+            for i in range(9):
+                x = i % 3
+                y = i // 3
+                pos = [startPos[0] + (x*SQUARE_SIZE), startPos[1] + (y*SQUARE_SIZE)]
+                if(
+                    pos[0] >= translation[0] and
+                    pos[0] < translation[0] + (SQUARE_SIZE * 28) and
+                    pos[1] >= translation[1] and
+                    pos[1] < translation[1] + (SQUARE_SIZE * 28)
+                ):
+                    print(":"+ str(translation[0]) + "," + str(pos[1]))
+                    squares.append(pygame.Rect(pos[0],pos[1],SQUARE_SIZE,SQUARE_SIZE))
      elif(mouseEvents[2] == True):
         mousePos = pygame.mouse.get_pos()
         mousePos = getSquaredPosition(list(mousePos),translation)

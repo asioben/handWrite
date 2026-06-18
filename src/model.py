@@ -10,7 +10,7 @@ import load
 import json 
 import os 
 
-class NeuralNetwork(object):
+class NeuralNetwork:
     def __init__(self,sizes):
         self.sizes = sizes
         #self.layer = len(self.sizes)
@@ -85,7 +85,7 @@ class NeuralNetwork(object):
             print("Epoch (" + str(epoch) + "): " + str(network_accuracy) + ("%"))
     
     def predict(self,X,y):
-        indice = 6020#np.random.randint(len(X)) #image to recognize
+        indice = np.random.randint(len(X)) #image to recognize
         img = np.reshape(X[indice],(784,1))
         output = self.forward_propagation(img)
         digit = np.argmax(output)
@@ -184,6 +184,7 @@ def main():
     model = NeuralNetwork((784,128,64,32,10))
     command = -1
     filepath = ""
+    trained = False
     while True:
         print_menu()
         command = test_NAN(command,"What's your command: ")
@@ -195,9 +196,13 @@ def main():
             break
         elif command == 1:
             print("Model in training...")
+            trained = True
             model.train(x_train,y_train,0.01,60,16)
         elif command == 2:
             print("We gonna predict...")
+            if(trained == False):
+                model = load_network("model.json")
+                trained = True
             model.predict(x_test,y_test)
         elif command == 3:
             filepath_or = input("Choose a filepath (tap y) or not: ")
@@ -215,5 +220,5 @@ def main():
                check_file_and_write(filepath)
             model.download_network(filepath)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

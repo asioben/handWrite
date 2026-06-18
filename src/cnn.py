@@ -1,0 +1,1 @@
+"Model of Convolutional Neural Network 1.0"
