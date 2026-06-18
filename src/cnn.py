@@ -26,6 +26,22 @@ class CNN():
 
         return output
     
+    def pool(self, input):
+        h, w, d = input.shape # d for depth -\__:-:_/-
+        h_ = h // 2
+        w_ = w // 2
+
+        output = np.zeros((h // 2, w // 2, d))
+
+        for i in range(h_):
+            for j in range(w_):
+                region = input[(i * 2) : ((i * 2) + 2), (j * 2) : ((j * 2) + 2)]
+                output[i , j] = np.amax(region, axis=(0,1))
+
+        return output
+
+    
 cnn = CNN(8)
 output = cnn.convolution(np.reshape(load.x_train[0],(28,28)))
+output = cnn.pool(output)
 print(output.shape)
