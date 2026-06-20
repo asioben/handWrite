@@ -7,17 +7,16 @@ import numpy as np
 import nn
 import load
 
-class CNN():
+#class
+from nn import NeuralNetwork
+
+class CNN(NeuralNetwork):
     def __init__(self,filters_size,sizes):
-        #super().__init__(sizes)
+        super().__init__(sizes)
         self.filters_size = filters_size
         #the dimension of the filter is as such: (filters_size,3,3), it's a 3D array(tensor)
         #here the init
         self.filters = [np.random.randn(filters_size ,3,3) / 9 for i in range(2)]
-        print(self.filters)
-        print(len(self.filters))
-        #self.weights = [np.random.randn(y,x) * np.sqrt(2/x) for x,y in zip(sizes[:-1], sizes[1:])]
-        #self.biases = [np.zeros((y,1)) for y in sizes[1:]]
 
 
     def convolution(self, input):
@@ -59,24 +58,30 @@ class CNN():
         output = nn.reLU(output)
         #first maxpool
         output = self.pool(output)
-        print(output.shape)
 
         return output
     
-    #def perceptron():
+    def perceptron(self, input):
+        input = np.reshape(input,(self.filters_size * 5 * 5, 1))
+        #print(input)
+        print(input.shape)
+        output = super().forward_propagation(input)
+        return output
     
     def forward(self, input):
         for i in range(2):
             output = self.convolutional_layer(input)
-            self.filters_size *= 2
+            if(i < 1):
+                self.filters_size *= 2
             input = output
+        output = self.perceptron(input)
         
         
 
     
 cnn = CNN(8,(400,64,10))
 input = np.reshape(load.x_train[0],(28,28,1))
-"""output = cnn.convolution()
-output = cnn.pool(output)
-print(output.shape)"""
 cnn.forward(input)
+"""img = load.x_train[0]
+string = "test"
+load.show_img([img,img,img,img,img],[string,string,string,string,string])"""
