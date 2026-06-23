@@ -46,6 +46,9 @@ class NeuralNetwork:
              self.dB[i] = (1/m) * np.sum(dZ,axis=1,keepdims=True)
              if i > 0:
                  dZ = np.dot(self.weights[i].T,dZ) * (self.z[i-1] > 0)
+                 
+         dZ = np.dot(self.weights[0].T,dZ)
+         return dZ
     
     #update the weights and biases depnding on the error
     def update(self):
