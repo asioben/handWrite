@@ -84,7 +84,7 @@ class CNN(NeuralNetwork):
         output = super().forward_propagation(input)
         return output
     
-    def forward(self, input):
+    def forward_propagation(self, input):
         for i in range(2):
             output = self.convolutional_layer(input)
             if(i < 1):
@@ -94,7 +94,8 @@ class CNN(NeuralNetwork):
 
     def back_pool(self, dO, step, shape): 
         #dI stands for dInputs
-        dI = np.zeros(self.shapes[shape -1]) 
+
+        dI = np.zeros(self.shapes[shape - 1]) 
         dO = np.reshape(dO,self.shapes[shape])
         #dO stands for dOutputs
         h, w, _ = dO.shape
@@ -121,7 +122,7 @@ class CNN(NeuralNetwork):
         for i in range(h):
             for j in range(w):
                 for k in range(d):
-                    if i < (h_ - 2) and j < (w_-2) and k < d_ and step != 0:
+                    if i < (h_ - 2) and j < (w_ - 2) and k < d_ and step != 0:
                        dI[i:i+3, j:j+3, k] += dO[i,j,k] * np.rot90(self.filters[step][k],2)
                     dW += self.region[step][counter].T * dO[i,j,k]
                 counter += 1
@@ -143,12 +144,14 @@ class CNN(NeuralNetwork):
         #print()
         shape = -1
         for i in reversed(range(2)):
+            """if i == 1:
+                for j in range(len(self.shapes)):
+                    print(self.shapes[j])"""
             dO = self.back_pool(dO,i,shape)
             dO = back_reLU(dO, self.conv_out[i])
             dO, dW, dB = self.back_conv(dO,i,i)
             self.update(dW,dB,i)
-            shape -= 2
-        
+            shape -= 2    
 
 
 #miscellanous functions
@@ -157,10 +160,10 @@ def back_reLU(a, b):
    #b represents the mask, the sets of 0 and 1
    return a * (b > 0)
     
-cnn = CNN(8,(400,64,10))
+"""cnn = CNN(8,(400,64,10))
 input = np.reshape(load.x_train[0],(28,28,1))
-cnn.forward(input)
-cnn.back_propagation(np.reshape(load.y_train[0],(1,1)))
+cnn.forward_propagation(input)
+cnn.back_propagation(np.reshape(load.y_train[0],(1,1)))"""
 """img = load.x_train[0]
 string = "test"
 load.show_img([img,img,img,img,img],[string,string,string,string,string])"""

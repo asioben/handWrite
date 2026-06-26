@@ -26,17 +26,22 @@ menu = [
         "4: Download"
 ]
 
-models_ = [
+models_menu = [
     "Choose your model:",
     "1: Multilayer Perceptron / Neural Network (NN)",
     "2: Convolutional Neural Network (CNN)",
     "0: Go Back -\__:-:_/-"
 ]
 
-models = [
+models_name = [
     "Multilayer Perceptron / Neural Network (NN)",
     "Convolutional Neural Network (CNN)",
     "Nothing :("
+]
+
+model_filepaths = [
+    "nn_model.json",
+    "cnn_model.json"
 ]
 
 def print_(to_Print):
@@ -54,7 +59,7 @@ def test_NAN(test,text,to_Print):
             print_(to_Print)
 
 def check_file_and_write(filepath):
-    print("I'll create a new file, model.json")
+    print("I'll create a new file: " + filepath)
     with open(filepath, "w") as file:
         file.write("")
 
@@ -71,93 +76,98 @@ def main():
     nn_model = nn.NeuralNetwork(size)
     cnn_model = cnn.CNN(8,(size))
     model = None
-    command = -1
-    command_ = -1
+    menu_command = -1
+    model_command = -1
     _command_ = -1
     filepath = ""
-    trained = False
 
     while True:
         print("We are using : ")
-        _command_ = command_
+        _command_ = model_command
         if _command_ != -1:
-            _command_ = command_ - 1 
-        print(models[_command_])
-        if(command != 1):
+            _command_ = model_command - 1 
+        print(models_name[_command_])
+        if(menu_command != 1):
             print_(menu)
-            command = test_NAN(command,"What's your command: ",menu)
-            number_expectation(menu,0,4,command)
+            menu_command = test_NAN(menu_command,"What's your command: ",menu)
+            number_expectation(menu,0,4,menu_command)
         #print(command)
-        if command == 0:
+        if menu_command == 0:
             print("Bye...")
             break
 
-        elif command == 1:
+        elif menu_command == 1:
             choose_model = True
             while choose_model == True:
-                print_(models_)
-                command_ = test_NAN(command_,"Whats's your command: ",models_)
-                number_expectation(models_,0,2,command_)
+                print_(models_menu)
+                model_command = test_NAN(model_command,"Whats's your command: ",models_menu)
+                number_expectation(models_menu,0,2,model_command)
                 
-                if command_ == 0:
+                if model_command == 0:
                     print("Bye")
                     choose_model = False
-                    command = -1
-                elif command_ == 1:
+                    menu_command = -1
+                elif model_command == 1:
                     model = nn_model
                     print("The model in usage is the Multilayer Perceptron / Neural Network (NN) ")
                     choose_model = False
-                    command = -1
-                elif command_ == 2:
+                    menu_command = -1
+                elif model_command == 2:
                     model = cnn_model
                     print("The model in usage is the Multilayer Convolutional Neural Network (CNN) ")
                     choose_model = False
-                    command = -1
+                    menu_command = -1
                 
-        elif command == 2:
+        elif menu_command == 2:
             if(model == None):
                 print("There is no model to train")
                 print("Go ahead choose one")
-                command = 1
+                menu_command = 1
             else:
                print("Model in training...")
-               trained = True
+               if model_command == 2:
+                   print("Closed command")
+                   break
                model.train(x_train,y_train,0.01,60,16)
 
-        elif command == 3:
+        elif menu_command == 3:
             if(model == None):
                 print("We don't have a model to make prediction with")
                 print("Please, consider choosing one before !")
-                command = 1
+                menu_command = 1
             else:
+               if model_command == 2:
+                   print("Closed command")
+                   break
                print("We gonna predict...")
-               if(trained == False):
-                  model = nn.load_network("model.json")
-                  trained = True
+               if(model.trained == False):
+                  model = nn.load_network(model_filepaths[_command_])
                model.predict(x_test,y_test)
 
-        elif command == 4:
-            print("Closed command")
-            break
+        elif menu_command == 4:
+            if model_command == 2:
+                   print("Closed command")
+                   break
+            
             if(model == None):
                 print("What model do you even whant to download")
                 print("Choose one before doing that")
-                command = 1
+                menu_command = 1
             else:
-                filepath_or = input("Choose a filepath (tap y) or not: ")
-                if filepath_or == "y":
-                   filepath = input("Write the filepath: ")
-                   while os.path.exists(filepath) == False:
-                     if filepath != "y":
-                       filepath = input("Be sure that file exist (tap y), write the filepath: ")
-                     else: 
-                        filepath = "model.json"
-                        check_file_and_write(filepath)
-                        break
-                else:
-                  filepath = "model.json"
-                  check_file_and_write(filepath)
-                model.download_network(filepath)
+                filepath = model_filepaths[_command_]
+                check_file_and_write(filepath)
+            
+            model.download_network(filepath)
 
 if __name__ == "__main__":
     main()
+
+    #################
+    """
+        ############
+    I DONT NEED CLASSES !!!!
+    I NEED NAMESPACE :( !!!!!
+        #############
+    """
+
+    ##################

@@ -15,6 +15,7 @@ class NeuralNetwork:
         #self.layer = len(self.sizes)
         self.biases = [np.zeros((y,1)) for y in sizes[1:]]
         self.weights = [np.random.randn(y,x) * np.sqrt(2/x) for x,y in zip(sizes[:-1], sizes[1:])]
+        self.trained = False
 
     #this function is the activation of a function, when it "fires"
     #btw a stands for activation, w for weight and b for bias  
@@ -62,6 +63,7 @@ class NeuralNetwork:
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.epoch = epoch
+        self.trained = True
         for epoch in range(self.epoch):
             permutation = np.random.permutation(len(self.X))
             self.X = shuffle_dataset(self.X,permutation)
@@ -77,6 +79,7 @@ class NeuralNetwork:
                 y_batch = np.transpose(y_batch)
                 y_batch_true = self.y[key:key+self.batch_size]
                 y_batch_true = np.transpose(y_batch_true)
+                print(X_batch.shape)
                 assert X_batch.shape[0] == 784
                 assert y_batch.shape[0] == 10
                 y = self.forward_propagation(X_batch)
