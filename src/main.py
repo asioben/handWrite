@@ -10,6 +10,7 @@ import sys
 
 #dependacies
 import nn
+import cnn
 
 #const
 HEIGHT = 600
@@ -90,7 +91,7 @@ def main():
     squares = []
 
     #load the neural network
-    network = nn.load_network("model.json")
+    network = nn.load_network("cnn_model.json")
 
     #the canvas you drew
     pixels = np.zeros((784,1))
