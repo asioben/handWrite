@@ -28,15 +28,36 @@ class CNN(NeuralNetwork):
         h, w, d = input.shape # d for depth again !
         output = np.zeros((h - 2, w - 2, self.filters_size))
         regions = []
+        step = 0
         for i in range(h - 2):
             for j in range(w - 2):
-                if d > 1: 
+                """if d > 1: 
                     region = input[i: (i + 3), j: (j + 3), :]               
                     output[i, j] = np.vdot(region.T,self.filters[1]) + self.conv_biases[1]
                 else:
                     input = np.reshape(input,(28,28))
                     region = input[i: (i + 3), j: (j + 3)]
-                    output[i, j] = np.sum(region * self.filters[0], axis = (1,2)) + self.conv_biases[0]
+                    output[i, j] = np.sum(region * self.filters[0], axis = (1,2)) + self.conv_biases[0]"""
+                if d > 1:
+                    region = input[i: (i + 3), j: (j + 3), :]
+                    region = region.flatten()
+                    print(input.shape)
+                    print(region.shape)
+                    step = 1
+                else:
+                    region = input[i: (i + 3), j: (j + 3), 0]
+                    region = np.reshape(region,(3,3,1))
+                    #print(input.shape)
+                    print(self.conv_biases[step].shape)
+                    print(self.filters[step].shape)
+                    step = 0
+                #print(output[i, j].shape)
+                #print(self.filters[step].shape)
+                #print(self.conv_biases[step].shape)
+                #region_ = region.flatten()
+                filters_ = self.filters[step].flatten()
+                output[i, j] = np.sum(region * filters_) + self.conv_biases[step]
+
                 regions.append(region)
 
         self.conv_out.append(output)
@@ -160,10 +181,22 @@ def back_reLU(a, b):
    #b represents the mask, the sets of 0 and 1
    return a * (b > 0)
     
-"""cnn = CNN(8,(400,64,10))
+cnn = CNN(8,(400,64,10))
 input = np.reshape(load.x_train[0],(28,28,1))
 cnn.forward_propagation(input)
-cnn.back_propagation(np.reshape(load.y_train[0],(1,1)))"""
+#cnn.back_propagation(np.reshape(load.y_train[0],(1,1)))
 """img = load.x_train[0]
 string = "test"
 load.show_img([img,img,img,img,img],[string,string,string,string,string])"""
+
+
+"""
+I'M NOT DONE YET
+I NEED DO ADD BATCH AND DO TO MORE TEST 
+AND BETTER EVERYTHING UP
+
+TODO LIST:
+- BATCH
+- TEST EVEN IF THE MODEL IS CORRECTLY DONE
+- CLEANUP
+"""
