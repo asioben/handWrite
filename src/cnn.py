@@ -13,6 +13,7 @@ from nn import NeuralNetwork
 class CNN(NeuralNetwork):
     def __init__(self,filters_size,sizes):
         super().__init__(sizes)
+        self.og_filters_sizes = filters_size
         self.filters_size = filters_size
         #the dimension of the filter is as such: (filters_size,3,3), it's a 3D array(tensor)
         #here the init
@@ -22,10 +23,15 @@ class CNN(NeuralNetwork):
         self.shapes = []
         self.conv_out = []
         self.region = []
+        self.cnn = True
 
 
     def convolution(self, input):
-        print(input.shape)
+        if(input.ndim == 2):
+           shape = input.shape
+           size = int(np.sqrt(shape[0]))
+           input = np.reshape(input,(shape[1],size,size,1))
+           #print(input.shape)
         b, h, w, d = input.shape # d for depth again !
         output = np.zeros((b,h - 2, w - 2, self.filters_size))
         regions = []
@@ -33,13 +39,6 @@ class CNN(NeuralNetwork):
         for k in range(b):
          for i in range(h - 2):
             for j in range(w - 2):
-                """if d > 1: 
-                    region = input[i: (i + 3), j: (j + 3), :]               
-                    output[i, j] = np.vdot(region.T,self.filters[1]) + self.conv_biases[1]
-                else:
-                    input = np.reshape(input,(28,28))
-                    region = input[i: (i + 3), j: (j + 3)]
-                    output[i, j] = np.sum(region * self.filters[0], axis = (1,2)) + self.conv_biases[0]"""
                 if d > 1:
                     region = input[k, i: (i + 3), j: (j + 3), :]
                     region_ = region.flatten()
@@ -49,14 +48,15 @@ class CNN(NeuralNetwork):
                     region_ = np.reshape(region,(3,3,1))
                     step = 0
                 filters_ = self.filters[step].flatten()
+                
                 output[k, i, j] = np.sum(region_ * filters_) + self.conv_biases[step]
 
-                regions.append(region)
+                if(self.trained == True):
+                   regions.append(region)
 
-        self.conv_out.append(output)
-        self.region.append(regions)
-                #output[i, j] = np.sum(region * self.filters, axis = (1,2))
-                #output[i, j] = np.einsum('ijk,ijk',region,self.filters)
+        if(self.trained == True):   
+           self.conv_out.append(output)
+           self.region.append(regions)
 
         return output
     
@@ -73,10 +73,12 @@ class CNN(NeuralNetwork):
             for j in range(w_):
                 region = input[k, (i * 2) : ((i * 2) + 2), (j * 2) : ((j * 2) + 2)]
                 output[k, i , j] = np.amax(region, axis=(0,1))
-                row, col, _ = np.where(output[k, i, j] == region)
-                element = (row[0], col[0])
-                max_pool.append(element)
-        self.max_pool.append(max_pool)
+                if(self.trained == True):
+                   row, col, _ = np.where(output[k, i, j] == region)
+                   element = (row[0], col[0])
+                   max_pool.append(element)
+        if(self.trained == True):
+           self.max_pool.append(max_pool)
 
         return output
     
@@ -93,20 +95,20 @@ class CNN(NeuralNetwork):
         return output
     
     def perceptron(self, input):
-        print(input.size)
         input = np.reshape(input,(input.size, 1))
-        #print(input)
-        #print(input.shape)
         output = super().forward_propagation(input)
         return output
     
     def forward_propagation(self, input):
+        #print(input.shape)
         for i in range(2):
             output = self.convolutional_layer(input)
             if(i < 1):
                 self.filters_size *= 2
             input = output
         output = self.perceptron(input)
+
+        return output
 
     def back_pool(self, dO, step, shape): 
         #dI stands for dInputs
@@ -156,15 +158,20 @@ class CNN(NeuralNetwork):
 
     def back_propagation(self, y):
         #print(self.shapes)
-        self.learning_rate = 0.01
-        for k in range(len(y)):
-         #backward
-         dO = super().back_propagation(y[k])
-         #SGD
-         super().update()
-         #print()
-         shape = -1
-         for i in reversed(range(2)):
+        #self.trained = True
+        shape = y.shape
+        y = np.reshape(y,(shape[1],shape[0],1))
+        #print(y.shape)
+
+        for k in range(y.shape[0]):
+          #backward
+          dO = super().back_propagation(y[k])
+          #SGD
+          super().update()
+
+        #print()
+        shape = -1
+        for i in reversed(range(2)):
             """if i == 1:
                 for j in range(len(self.shapes)):
                     print(self.shapes[j])"""
@@ -172,7 +179,15 @@ class CNN(NeuralNetwork):
             dO = back_reLU(dO, self.conv_out[i])
             dO, dW, dB = self.back_conv(dO,i,i)
             self.update(dW,dB,i)
-            shape -= 2    
+            shape -= 2  
+
+        self.filters_size = self.og_filters_sizes 
+        self.max_pool = []
+        self.shapes = []
+        self.conv_out = []
+        self.region = []
+
+          
 
 
 #miscellanous functions
@@ -181,10 +196,11 @@ def back_reLU(a, b):
    #b represents the mask, the sets of 0 and 1
    return a * (b > 0)
     
-cnn = CNN(8,(800,64,10))
-input = np.reshape([load.x_train[0],load.x_train[1]],(2,28,28,1))
+"""cnn = CNN(8,(800,64,10))
+input = np.reshape([load.x_train[0],load.x_train[1]],(784,2))
+cnn.trained = True
 cnn.forward_propagation(input)
-cnn.back_propagation(np.reshape([load.y_train[0],load.y_train[1]],(2,1,1)))
+cnn.back_propagation(np.reshape([load.y_train[0],load.y_train[1]],(2,1,1)))"""
 """img = load.x_train[0]
 string = "test"
 load.show_img([img,img,img,img,img],[string,string,string,string,string])"""
@@ -194,7 +210,7 @@ load.show_img([img,img,img,img,img],[string,string,string,string,string])"""
 WHAT I'VE DONE SO FAR:
 -CLEANUP CONV OUTPUT CALCULATION
 -ADD BATCH SIZE DIMENSION
-for the moment every shape seems correct 
+for the moment every shape seem correct 
 """
 """
 WHAT WE GONNA DO

@@ -91,7 +91,7 @@ def main():
     squares = []
 
     #load the neural network
-    network = nn.load_network("cnn_model.json")
+    network = nn.load_network("nn_model.json")
 
     #the canvas you drew
     pixels = np.zeros((784,1))
@@ -124,11 +124,12 @@ def main():
      if(mouseEvents[0] == True):
         mousePos = pygame.mouse.get_pos()
         mousePos = getSquaredPosition(list(mousePos),translation)
-        startPos = [mousePos[0] - (SQUARE_SIZE), mousePos[1] - (SQUARE_SIZE)]
+        if(mousePos != None):
+            startPos = [mousePos[0] - (SQUARE_SIZE), mousePos[1] - (SQUARE_SIZE)]
 
-        if(mousePos[0] != -1): 
-            #squares.append(pygame.Rect(mousePos[0],mousePos[1],SQUARE_SIZE,SQUARE_SIZE))
-            for i in range(9):
+            if(mousePos[0] != -1): 
+              #squares.append(pygame.Rect(mousePos[0],mousePos[1],SQUARE_SIZE,SQUARE_SIZE))
+              for i in range(9):
                 x = i % 3
                 y = i // 3
                 pos = [startPos[0] + (x*SQUARE_SIZE), startPos[1] + (y*SQUARE_SIZE)]
@@ -138,7 +139,6 @@ def main():
                     pos[1] >= translation[1] and
                     pos[1] < translation[1] + (SQUARE_SIZE * 28)
                 ):
-                    print(":"+ str(translation[0]) + "," + str(pos[1]))
                     squares.append(pygame.Rect(pos[0],pos[1],SQUARE_SIZE,SQUARE_SIZE))
 
      elif(mouseEvents[2] == True):

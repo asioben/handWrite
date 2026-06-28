@@ -64,7 +64,7 @@ def check_file_and_write(filepath):
         file.write("")
 
 def number_expectation(to_Print,small,large,command):
-    while command > large or command < small:
+    if command > large or command < small:
             print(errorCode)
             print_(to_Print)
             #command = test_NAN(command,"What's your command: ",to_Print)
@@ -72,9 +72,9 @@ def number_expectation(to_Print,small,large,command):
     #return True
 
 def main():
-    size = (784,128,64,32,10)
+    size = (784,128,64,10)
     nn_model = nn.NeuralNetwork(size)
-    cnn_model = cnn.CNN(8,(size))
+    cnn_model = cnn.CNN(8,(24000,64,10))
     model = None
     menu_command = -1
     model_command = -1
@@ -125,10 +125,7 @@ def main():
                 menu_command = 1
             else:
                print("Model in training...")
-               if model_command == 2:
-                   print("Closed command")
-                   break
-               model.train(x_train,y_train,0.01,60,16)
+               model.train(x_train,y_train,0.001,60,8)
 
         elif menu_command == 3:
             if(model == None):

@@ -16,6 +16,11 @@ class NeuralNetwork:
         self.biases = [np.zeros((y,1)) for y in sizes[1:]]
         self.weights = [np.random.randn(y,x) * np.sqrt(2/x) for x,y in zip(sizes[:-1], sizes[1:])]
         self.trained = False
+        self.cnn = False
+        result = 0
+        for i in range(len(self.weights)):
+            result += self.weights[i].size
+        print(result)
 
     #this function is the activation of a function, when it "fires"
     #btw a stands for activation, w for weight and b for bias  
@@ -64,6 +69,7 @@ class NeuralNetwork:
         self.batch_size = batch_size
         self.epoch = epoch
         self.trained = True
+        epochs_text = []
         for epoch in range(self.epoch):
             permutation = np.random.permutation(len(self.X))
             self.X = shuffle_dataset(self.X,permutation)
@@ -72,6 +78,7 @@ class NeuralNetwork:
             number_batches = len(self.X) // self.batch_size
             model_accuracy = []
             for j in range(number_batches):
+                print(epoch,j)
                 key = j * self.batch_size #where to chop the batch
                 X_batch = self.X[key:key+self.batch_size]
                 X_batch = np.transpose(X_batch)
@@ -79,15 +86,18 @@ class NeuralNetwork:
                 y_batch = np.transpose(y_batch)
                 y_batch_true = self.y[key:key+self.batch_size]
                 y_batch_true = np.transpose(y_batch_true)
-                print(X_batch.shape)
-                assert X_batch.shape[0] == 784
-                assert y_batch.shape[0] == 10
                 y = self.forward_propagation(X_batch)
                 self.back_propagation(y_batch)
-                self.update()
+                if(self.cnn == False):
+                    self.update()
                 model_accuracy.append(accuracy(y,y_batch_true))
             network_accuracy = np.mean(model_accuracy) * 100
-            print("Epoch (" + str(epoch) + "): " + str(network_accuracy) + ("%"))
+            text = "Epoch (" + str(epoch) + "): " + str(network_accuracy) + ("%")
+            epochs_text.append(text)
+            print(text)
+            print("//////////////////////////////////")
+        for z in range(len(epochs_text)):
+            print(epochs_text[z])
     
     def predict(self,X,y):
         indice = np.random.randint(len(X)) #image to recognize
