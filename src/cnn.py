@@ -17,13 +17,13 @@ class CNN(NeuralNetwork):
         self.filters_size = filters_size
         #the dimension of the filter is as such: (filters_size,3,3), it's a 3D array(tensor)
         #here the init
-        self.filters = [np.random.randn(filters_size ,3,3) / 9 for i in range(2)]
+        self.filters = [np.random.randn(filters_size * i ,3,3,np.pow(filters_size,i-1)) / 9 for i in range(1,3)]
         self.conv_biases = [np.zeros((filters_size * i,)) for i in range(1,3)]
-        self.max_pool = []
+        self.max_pool = [0,0]
         self.shapes = []
         self.conv_out = []
-        self.region = []
         self.cnn = True
+        self.input = None
 
 
     def convolution(self, input):
@@ -34,62 +34,61 @@ class CNN(NeuralNetwork):
            #print(input.shape)
         b, h, w, d = input.shape # d for depth again !
         output = np.zeros((b,h - 2, w - 2, self.filters_size))
-        regions = []
         step = 0
         for k in range(b):
          for i in range(h - 2):
             for j in range(w - 2):
+              for f in range(self.filters_size):
                 if d > 1:
                     region = input[k, i: (i + 3), j: (j + 3), :]
-                    region_ = region.flatten()
+                    #region_ = region.flatten()
                     step = 1
                 else:
                     region = input[k, i: (i + 3), j: (j + 3), 0]
-                    region_ = np.reshape(region,(3,3,1))
+                    #region_ = np.reshape(region,(3,3,1))
                     step = 0
-                filters_ = self.filters[step].flatten()
-                
-                output[k, i, j] = np.sum(region_ * filters_) + self.conv_biases[step]
-
-                if(self.trained == True):
-                   regions.append(region)
+                    self.input = input
+                    self.filters[step] = self.filters[step].squeeze()
+                #filters_ = self.filters[step].flatten()
+                #print(region_.shape,filters_.shape)
+                #print(output[k,i,j,f].shape,region.shape,self.filters[step][f].shape,self.conv_biases[step][f].shape)
+                output[k, i, j, f] = np.sum(region * self.filters[step][f]) + self.conv_biases[step][f]
 
         if(self.trained == True):   
            self.conv_out.append(output)
-           self.region.append(regions)
 
         return output
     
-    def pool(self, input):
+    def pool(self, input, step):
         b, h, w, d = input.shape # d for depth -\__:-:_/-
         h_ = h // 2
         w_ = w // 2
 
         output = np.zeros((b, h_, w_, d))
-        max_pool = []
+        self.max_pool[step] = np.empty((b,h_,w_,d,2), dtype=int)
 
         for k in range(b):
           for i in range(h_):
             for j in range(w_):
                 region = input[k, (i * 2) : ((i * 2) + 2), (j * 2) : ((j * 2) + 2)]
-                output[k, i , j] = np.amax(region, axis=(0,1))
+                output[k, i , j, :] = np.max(region, axis=(0,1))
                 if(self.trained == True):
-                   row, col, _ = np.where(output[k, i, j] == region)
-                   element = (row[0], col[0])
-                   max_pool.append(element)
-        if(self.trained == True):
-           self.max_pool.append(max_pool)
+                   for c in range(d):
+                    index = np.argmax(region[:,:,c])
+                    row = index // 2
+                    col = index % 2
+                    self.max_pool[step][k,i,j,c] = (row,col)
 
         return output
     
-    def convolutional_layer(self, input):
+    def convolutional_layer(self, input, step):
          #conv(8)
         output = self.convolution(input)
         self.shapes.append(output.shape)
         #first reLU
         output = nn.reLU(output)
         #first maxpool
-        output = self.pool(output)
+        output = self.pool(output,step)
         self.shapes.append(output.shape)
 
         return output
@@ -102,7 +101,7 @@ class CNN(NeuralNetwork):
     def forward_propagation(self, input):
         #print(input.shape)
         for i in range(2):
-            output = self.convolutional_layer(input)
+            output = self.convolutional_layer(input,i)
             if(i < 1):
                 self.filters_size *= 2
             input = output
@@ -116,15 +115,15 @@ class CNN(NeuralNetwork):
         dI = np.zeros(self.shapes[shape - 1]) 
         dO = np.reshape(dO,self.shapes[shape])
         #dO stands for dOutputs
-        b, h, w, _ = dO.shape
+        b, h, w, d = dO.shape
         #btw b always stand for batch size
-
-        counter = 0
+        
         for k in range(b):
          for i in range(h):
             for j in range(w):
-                dI[k,self.max_pool[step][counter]] = dO[k, i, j]
-                counter += 1
+             for c in range(d):
+                mi, mj = self.max_pool[step][k,i,j,c]
+                dI[k,i*2+mi,j*2+mj,c] = dO[k,i,j,c]
 
         return dI
 
@@ -136,18 +135,48 @@ class CNN(NeuralNetwork):
         dI = np.zeros(self.shapes[shape])
         b, h, w, d = dO.shape
         b, h_, w_, d_ = dI.shape
-        #tmp = np.zeros((h,1))
+
+
         
-        counter = 0
         for l in range(b):
+         
+         counter = 0
          dB += np.sum(dO[l],axis=(0,1))
+
          for i in range(h):
             for j in range(w):
+
                 for k in range(d):
-                    if i < (h_ - 2) and j < (w_ - 2) and k < d_ and step != 0:
-                       dI[l, i:i+3, j:j+3, k] += dO[l, i,j,k] * np.rot90(self.filters[step][k],2)
-                    dW += self.region[step][counter].T * dO[l,i,j,k]
+        
+                   if (i+3) <= h_ and (j+3) <= w_:
+
+                        if step != 0:
+                          
+                          for c in range(d_):
+                            dI[l, i:i+3, j:j+3, c] += dO[l, i,j,k] * np.rot90(self.filters[step][k,:,:,c],2)
+                    
+                        else:
+                            dI[l, i:i+3, j:j+3, 0] += dO[l, i,j,k] * np.rot90(self.filters[step][k],2)
+
+                   region = self.input[l, i:i+3, j:j+3, :].squeeze()
+                   if k < dW.shape[0]:
+                      if step == 0:
+                        dW[k] += region * dO[l,i,j,k]
+                      else:
+                         for e in range(dW.shape[-1]):
+                            dW[k,:,:,e] += region * dO[l,i,j,k]
+                      
                 counter += 1
+
+        dW /= b
+        dB /= b
+
+        """print(np.linalg.norm(dW))
+        print(np.linalg.norm(dI))"""
+
+        """print(np.isnan(dO).any())
+        print(np.max(np.abs(dO)))"""
+        
 
         return dI,dW,dB
 
@@ -159,33 +188,39 @@ class CNN(NeuralNetwork):
     def back_propagation(self, y):
         #print(self.shapes)
         #self.trained = True
+        #self.learning_rate = 0.01
         shape = y.shape
         y = np.reshape(y,(shape[1],shape[0],1))
         #print(y.shape)
 
         for k in range(y.shape[0]):
           #backward
-          dO = super().back_propagation(y[k])
+          dO, loss = super().back_propagation(y[k])
           #SGD
           super().update()
+          #print(dO.shape)
 
         #print()
         shape = -1
         for i in reversed(range(2)):
-            """if i == 1:
-                for j in range(len(self.shapes)):
+            if i == 1:
+                """for j in range(len(self.shapes)):
                     print(self.shapes[j])"""
             dO = self.back_pool(dO,i,shape)
+            #print(dO.shape)
             dO = back_reLU(dO, self.conv_out[i])
             dO, dW, dB = self.back_conv(dO,i,i)
+            #print(dO.shape)
             self.update(dW,dB,i)
             shape -= 2  
 
         self.filters_size = self.og_filters_sizes 
-        self.max_pool = []
+        self.max_pool = [0,0]
         self.shapes = []
         self.conv_out = []
-        self.region = []
+        self.input = None
+
+        return loss
 
           
 

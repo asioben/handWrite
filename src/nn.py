@@ -18,9 +18,9 @@ class NeuralNetwork:
         self.trained = False
         self.cnn = False
         result = 0
-        for i in range(len(self.weights)):
+        """for i in range(len(self.weights)):
             result += self.weights[i].size
-        print(result)
+        #print(result)"""
 
     #this function is the activation of a function, when it "fires"
     #btw a stands for activation, w for weight and b for bias  
@@ -44,6 +44,7 @@ class NeuralNetwork:
          #don't forget dZ, we can say it represents the error
          #and also y are labels
          m = y.shape[1]
+         loss = - np.log(self.a[-1][np.argmax(y)]) + 1e-9
          self.dW = [np.zeros_like(w) for w in self.weights]
          self.dB = [np.zeros_like(b) for b in self.biases]
          dZ = self.a[-1] - y
@@ -54,7 +55,7 @@ class NeuralNetwork:
                  dZ = np.dot(self.weights[i].T,dZ) * (self.z[i-1] > 0)
                  
          dZ = np.dot(self.weights[0].T,dZ)
-         return dZ
+         return dZ, loss
     
     #update the weights and biases depnding on the error
     def update(self):
@@ -77,6 +78,7 @@ class NeuralNetwork:
             y_true = transform_labels(self.y)
             number_batches = len(self.X) // self.batch_size
             model_accuracy = []
+            loss = 0
             for j in range(number_batches):
                 print(epoch,j)
                 key = j * self.batch_size #where to chop the batch
@@ -87,10 +89,16 @@ class NeuralNetwork:
                 y_batch_true = self.y[key:key+self.batch_size]
                 y_batch_true = np.transpose(y_batch_true)
                 y = self.forward_propagation(X_batch)
-                self.back_propagation(y_batch)
+                loss += self.back_propagation(y_batch)
                 if(self.cnn == False):
                     self.update()
                 model_accuracy.append(accuracy(y,y_batch_true))
+                if((j % 100) == 0):
+                    network_accuracy = np.mean(model_accuracy) * 100
+                    text = "Train step (" + str(j) + "): " + str(network_accuracy) + ("%")
+                    print(loss / 100)
+                    print(text)
+                    loss = 0
             network_accuracy = np.mean(model_accuracy) * 100
             text = "Epoch (" + str(epoch) + "): " + str(network_accuracy) + ("%")
             epochs_text.append(text)

@@ -74,7 +74,7 @@ def number_expectation(to_Print,small,large,command):
 def main():
     size = (784,128,64,10)
     nn_model = nn.NeuralNetwork(size)
-    cnn_model = cnn.CNN(8,(24000,64,10))
+    cnn_model = cnn.CNN(8,(400,64,10))
     model = None
     menu_command = -1
     model_command = -1
@@ -125,7 +125,7 @@ def main():
                 menu_command = 1
             else:
                print("Model in training...")
-               model.train(x_train,y_train,0.001,60,8)
+               model.train(x_train,y_train,0.001,1,8)
 
         elif menu_command == 3:
             if(model == None):
