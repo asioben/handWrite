@@ -7,6 +7,9 @@ import numpy as np
 import nn
 import load
 
+#third lib
+import json
+
 #class
 from nn import NeuralNetwork
 
@@ -221,9 +224,19 @@ class CNN(NeuralNetwork):
         self.input = None
 
         return loss
-
-          
-
+    
+    def download_network(self, filepath):
+       data = {
+            "sizes": self.sizes,
+            "filters_size": self.og_filters_sizes,
+            "filters": [f.tolist() for f in self.filters],
+            "conv_biases": [c.tolist() for c in self.conv_biases],
+            "weights": [w.tolist() for w in self.weights],
+            "biases": [b.tolist() for b in self.biases]
+        }
+       with open(filepath,"w") as file:
+            json.dump(data,file)
+       
 
 #miscellanous functions
 def back_reLU(a, b):   
@@ -231,11 +244,8 @@ def back_reLU(a, b):
    #b represents the mask, the sets of 0 and 1
    return a * (b > 0)
     
-"""cnn = CNN(8,(800,64,10))
-input = np.reshape([load.x_train[0],load.x_train[1]],(784,2))
-cnn.trained = True
-cnn.forward_propagation(input)
-cnn.back_propagation(np.reshape([load.y_train[0],load.y_train[1]],(2,1,1)))"""
+"""cnn = CNN(8,(400,64,10))
+cnn.predict(load.x_test,load.y_test)"""
 """img = load.x_train[0]
 string = "test"
 load.show_img([img,img,img,img,img],[string,string,string,string,string])"""

@@ -6,7 +6,8 @@ import nn
 import cnn
 
 #std lib
-import os 
+import numpy as np
+import json
 
 #data to train and test the model
 x_train = load.x_train
@@ -78,15 +79,15 @@ def main():
     model = None
     menu_command = -1
     model_command = -1
-    _command_ = -1
+    current_model = -1
     filepath = ""
 
     while True:
         print("We are using : ")
-        _command_ = model_command
-        if _command_ != -1:
-            _command_ = model_command - 1 
-        print(models_name[_command_])
+        current_model = model_command
+        if current_model != -1:
+            current_model = model_command - 1 
+        print(models_name[current_model])
         if(menu_command != 1):
             print_(menu)
             menu_command = test_NAN(menu_command,"What's your command: ",menu)
@@ -125,7 +126,7 @@ def main():
                 menu_command = 1
             else:
                print("Model in training...")
-               model.train(x_train,y_train,0.001,1,8)
+               model.train(x_train,y_train,0.001,1,1)
 
         elif menu_command == 3:
             if(model == None):
@@ -133,28 +134,43 @@ def main():
                 print("Please, consider choosing one before !")
                 menu_command = 1
             else:
-               if model_command == 2:
-                   print("Closed command")
-                   break
                print("We gonna predict...")
                if(model.trained == False):
-                  model = nn.load_network(model_filepaths[_command_])
+                  model = load_network(model_filepaths[current_model],(current_model + 1))
                model.predict(x_test,y_test)
 
         elif menu_command == 4:
-            if model_command == 2:
-                   print("Closed command")
-                   break
-            
             if(model == None):
                 print("What model do you even whant to download")
                 print("Choose one before doing that")
                 menu_command = 1
             else:
-                filepath = model_filepaths[_command_]
+                filepath = model_filepaths[current_model]
                 check_file_and_write(filepath)
             
             model.download_network(filepath)
+
+#load a neural network
+
+def load_network(filepath,model_type):
+    network = None
+    
+    with open(filepath,"r") as file:
+        data = json.load(file)
+
+    if(model_type == 1):
+      network = nn.NeuralNetwork(data["sizes"])
+      network.weights = [np.array(w) for w in data["weights"]]
+      network.biases = [np.array(b) for b in data["biases"]]
+
+    elif (model_type == 2):
+        network = cnn.CNN(data["filters_size"][0],data["sizes"])
+        network.filters = [np.array(f) for f in data["filters"]]
+        network.conv_biases = [np.array(c) for c in data["conv_biases"]]
+        network.weights = [np.array(w) for w in data["weights"]]
+        network.biases = [np.array(b) for b in data["biases"]]
+
+    return network
 
 if __name__ == "__main__":
     main()

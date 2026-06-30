@@ -17,7 +17,7 @@ class NeuralNetwork:
         self.weights = [np.random.randn(y,x) * np.sqrt(2/x) for x,y in zip(sizes[:-1], sizes[1:])]
         self.trained = False
         self.cnn = False
-        result = 0
+        #result = 0
         """for i in range(len(self.weights)):
             result += self.weights[i].size
         #print(result)"""
@@ -79,7 +79,7 @@ class NeuralNetwork:
             number_batches = len(self.X) // self.batch_size
             model_accuracy = []
             loss = 0
-            for j in range(number_batches):
+            for j in range(10):
                 print(epoch,j)
                 key = j * self.batch_size #where to chop the batch
                 X_batch = self.X[key:key+self.batch_size]
@@ -125,15 +125,6 @@ class NeuralNetwork:
         }
         with open(filepath,"w") as file:
             json.dump(data,file)
-
-#load a neural network
-def load_network(filepath):
-    with open(filepath,"r") as file:
-        data = json.load(file)
-    network = NeuralNetwork(data["sizes"])
-    network.weights = [np.array(w) for w in data["weights"]]
-    network.biases = [np.array(b) for b in data["biases"]]
-    return network
 
 #some miscellaneous function to compute
 #its just some mathematical function
