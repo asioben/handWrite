@@ -126,7 +126,7 @@ def main():
                 menu_command = 1
             else:
                print("Model in training...")
-               model.train(x_train,y_train,0.001,1,1)
+               model.train(x_train,y_train,0.001,60,1)
 
         elif menu_command == 3:
             if(model == None):
@@ -164,7 +164,7 @@ def load_network(filepath,model_type):
       network.biases = [np.array(b) for b in data["biases"]]
 
     elif (model_type == 2):
-        network = cnn.CNN(data["filters_size"][0],data["sizes"])
+        network = cnn.CNN(data["filters_size"],data["sizes"])
         network.filters = [np.array(f) for f in data["filters"]]
         network.conv_biases = [np.array(c) for c in data["conv_biases"]]
         network.weights = [np.array(w) for w in data["weights"]]

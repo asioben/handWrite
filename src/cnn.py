@@ -97,7 +97,8 @@ class CNN(NeuralNetwork):
         return output
     
     def perceptron(self, input):
-        input = np.reshape(input,(input.size, 1))
+        shape = self.sizes[0]
+        input = np.reshape(input,(shape, input.shape[0]))
         output = super().forward_propagation(input)
         return output
     
@@ -109,6 +110,7 @@ class CNN(NeuralNetwork):
                 self.filters_size *= 2
             input = output
         output = self.perceptron(input)
+        self.filters_size = self.og_filters_sizes
 
         return output
 
@@ -217,7 +219,7 @@ class CNN(NeuralNetwork):
             self.update(dW,dB,i)
             shape -= 2  
 
-        self.filters_size = self.og_filters_sizes 
+        #self.filters_size = self.og_filters_sizes 
         self.max_pool = [0,0]
         self.shapes = []
         self.conv_out = []

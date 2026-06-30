@@ -9,8 +9,7 @@ import numpy as np
 import sys
 
 #dependacies
-import nn
-import cnn
+import model
 
 #const
 HEIGHT = 600
@@ -91,7 +90,7 @@ def main():
     squares = []
 
     #load the neural network
-    network = nn.load_network("nn_model.json")
+    network = model.load_network("cnn_model.json",2)
 
     #the canvas you drew
     pixels = np.zeros((784,1))
@@ -104,6 +103,7 @@ def main():
             sys.exit()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
+                print(squares)
                 #squares = []
                 pixels = create_input(pixels,squares,translation)
                 output = network.forward_propagation(pixels)

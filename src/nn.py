@@ -79,7 +79,7 @@ class NeuralNetwork:
             number_batches = len(self.X) // self.batch_size
             model_accuracy = []
             loss = 0
-            for j in range(10):
+            for j in range(100):
                 print(epoch,j)
                 key = j * self.batch_size #where to chop the batch
                 X_batch = self.X[key:key+self.batch_size]
