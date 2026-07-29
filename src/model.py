@@ -126,7 +126,7 @@ def main():
                 menu_command = 1
             else:
                print("Model in training...")
-               model.train(x_train,y_train,0.001,60,1)
+               model.train(x_train,y_train,0.01,60,16)
 
         elif menu_command == 3:
             if(model == None):

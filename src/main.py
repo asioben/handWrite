@@ -90,7 +90,7 @@ def main():
     squares = []
 
     #load the neural network
-    network = model.load_network("cnn_model.json",2)
+    network = model.load_network("nn_model.json",1)
 
     #the canvas you drew
     pixels = np.zeros((784,1))
@@ -103,15 +103,16 @@ def main():
             sys.exit()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                print(squares)
                 #squares = []
                 pixels = create_input(pixels,squares,translation)
+                #print(np.reshape(pixels,(28,28)))
                 output = network.forward_propagation(pixels)
                 digit = np.argmax(output)
                 print("Prediction: " + str(digit))
                 #print("True: " + str(model.load.y_test[6020]))
                 #print(pixels)
                 #print("/////////////////////////////")
+                pixels = np.zeros((784,1))
                 print(output)
             if event.key == pygame.K_BACKSPACE:
                 squares = []

@@ -5,7 +5,7 @@ import numpy as np
 
 #dependancies
 import nn
-import load
+#import load
 
 #third lib
 import json
@@ -34,7 +34,6 @@ class CNN(NeuralNetwork):
            shape = input.shape
            size = int(np.sqrt(shape[0]))
            input = np.reshape(input,(shape[1],size,size,1))
-           #print(input.shape)
         b, h, w, d = input.shape # d for depth again !
         output = np.zeros((b,h - 2, w - 2, self.filters_size))
         step = 0
@@ -44,17 +43,13 @@ class CNN(NeuralNetwork):
               for f in range(self.filters_size):
                 if d > 1:
                     region = input[k, i: (i + 3), j: (j + 3), :]
-                    #region_ = region.flatten()
                     step = 1
                 else:
                     region = input[k, i: (i + 3), j: (j + 3), 0]
-                    #region_ = np.reshape(region,(3,3,1))
                     step = 0
                     self.input = input
                     self.filters[step] = self.filters[step].squeeze()
-                #filters_ = self.filters[step].flatten()
-                #print(region_.shape,filters_.shape)
-                #print(output[k,i,j,f].shape,region.shape,self.filters[step][f].shape,self.conv_biases[step][f].shape)
+                
                 output[k, i, j, f] = np.sum(region * self.filters[step][f]) + self.conv_biases[step][f]
 
         if(self.trained == True):   
@@ -174,14 +169,7 @@ class CNN(NeuralNetwork):
                 counter += 1
 
         dW /= b
-        dB /= b
-
-        """print(np.linalg.norm(dW))
-        print(np.linalg.norm(dI))"""
-
-        """print(np.isnan(dO).any())
-        print(np.max(np.abs(dO)))"""
-        
+        dB /= b        
 
         return dI,dW,dB
 
@@ -200,7 +188,7 @@ class CNN(NeuralNetwork):
 
         for k in range(y.shape[0]):
           #backward
-          dO, loss = super().back_propagation(y[k])
+          dO = super().back_propagation(y[k])
           #SGD
           super().update()
           #print(dO.shape)
@@ -208,9 +196,6 @@ class CNN(NeuralNetwork):
         #print()
         shape = -1
         for i in reversed(range(2)):
-            if i == 1:
-                """for j in range(len(self.shapes)):
-                    print(self.shapes[j])"""
             dO = self.back_pool(dO,i,shape)
             #print(dO.shape)
             dO = back_reLU(dO, self.conv_out[i])
@@ -224,8 +209,6 @@ class CNN(NeuralNetwork):
         self.shapes = []
         self.conv_out = []
         self.input = None
-
-        return loss
     
     def download_network(self, filepath):
        data = {
@@ -245,13 +228,6 @@ def back_reLU(a, b):
    #a represents the tensor that'd get transformed
    #b represents the mask, the sets of 0 and 1
    return a * (b > 0)
-    
-"""cnn = CNN(8,(400,64,10))
-cnn.predict(load.x_test,load.y_test)"""
-"""img = load.x_train[0]
-string = "test"
-load.show_img([img,img,img,img,img],[string,string,string,string,string])"""
-
 
 """
 WHAT I'VE DONE SO FAR:
