@@ -1,8 +1,12 @@
 "Superior Model of Convolutional Neural Network 1.0"
 
+#machine learning library
 import torch as pt
 from torch import nn
 import numpy as np
+
+#loading library
+import load
 
 #device = pt.accelerator.current_accelerator().type if pt.accelerator.is_available() else "cpu"
 #print(f"Using {device} device")
@@ -32,7 +36,8 @@ class SCNN(nn.Module):
           if j == (self.perceptron_size - 1):
              perceptron = nn.Sequential(
                 nn.Dropout(0.5),
-                nn.Linear(mlp_size[j - 1], mlp_size[j])
+                nn.Linear(mlp_size[j - 1], mlp_size[j]),
+                nn.Softmax(dim=1)
              )
           
           elif j == 0:
@@ -51,7 +56,8 @@ class SCNN(nn.Module):
 
           self.perceptron.append(perceptron)
 
-    def forward(self, x):
+
+    def forward_propagation(self, x):
         for i in range(self.conv_size):
             x = self.convolution[i](x)
             print(np.shape(x))
@@ -67,5 +73,13 @@ class SCNN(nn.Module):
         print(np.shape(logits))
         return logits
     
+
+    #def back_propagation(self,y):
+       
+x = load.x_test[0]
+#load.show_img([load.x_test[0]],"...")
+x = pt.tensor(x,dtype=pt.float32)
+x = pt.reshape(x,(1,1,28,28))
+#print(x.shape)
 model = SCNN(1,8,(128,64,10),2,3136)#.to(device)
-print(model.forward(pt.rand(1,1,28,28)))
+print(model.forward_propagation(x))
