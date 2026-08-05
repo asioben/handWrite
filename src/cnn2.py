@@ -1,8 +1,13 @@
 "Superior Model of Convolutional Neural Network 1.0"
 
 #machine learning library
+
+#torch
 import torch as pt
 from torch import nn
+from torch import optim
+
+#numpy
 import numpy as np
 
 #loading library
@@ -14,8 +19,8 @@ import load
 class SCNN(nn.Module):
     def __init__(self, channel, filter_size, mlp_size, conv_size, expected_input_size):
         super().__init__()
-        self.convolution = []
-        self.perceptron = []
+        self.convolution = nn.ModuleList([])
+        self.perceptron = nn.ModuleList([])
         self.conv_size = conv_size
         self.perceptron_size = len(mlp_size)
 
@@ -56,6 +61,11 @@ class SCNN(nn.Module):
 
           self.perceptron.append(perceptron)
 
+          #nn.ModuleList(self.convolution)
+          #nn.ModuleList(self.perceptron)
+          for param in self.parameters():
+            param.requires_grad = False
+
 
     def forward_propagation(self, x):
         for i in range(self.conv_size):
@@ -74,7 +84,16 @@ class SCNN(nn.Module):
         return logits
     
 
-    #def back_propagation(self,y):
+    def back_propagation(self, output, y):
+       loss = nn.MSELoss()
+       loss = loss(output,y)
+       optimizer = optim.SGD(self.parameters(),lr=0.01)
+       #print(self.parameters())
+
+       loss.requires_grad = True
+       loss.backward()
+       optimizer.step()
+       
        
 x = load.x_test[0]
 #load.show_img([load.x_test[0]],"...")
@@ -82,4 +101,9 @@ x = pt.tensor(x,dtype=pt.float32)
 x = pt.reshape(x,(1,1,28,28))
 #print(x.shape)
 model = SCNN(1,8,(128,64,10),2,3136)#.to(device)
-print(model.forward_propagation(x))
+output = pt.argmax(model.forward_propagation(x))
+print(output)
+print(len(list(model.parameters())))
+#for name, param in model.named_parameters():
+   #print(f"Layer: {name} | Size: {param.size()} | Values : {param[:2]} \n")
+model.back_propagation(output,pt.tensor(load.y_test[0]).float())
