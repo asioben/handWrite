@@ -42,7 +42,7 @@ class SCNN(nn.Module):
              perceptron = nn.Sequential(
                 nn.Dropout(0.5),
                 nn.Linear(mlp_size[j - 1], mlp_size[j]),
-                nn.Softmax(dim=1)
+                #nn.Softmax(dim=1),
              )
           
           elif j == 0:
@@ -64,35 +64,41 @@ class SCNN(nn.Module):
           #nn.ModuleList(self.convolution)
           #nn.ModuleList(self.perceptron)
           for param in self.parameters():
-            param.requires_grad = False
+            param.requires_grad = True
 
 
     def forward_propagation(self, x):
-        for i in range(self.conv_size):
-            x = self.convolution[i](x)
-            print(np.shape(x))
+        for conv in self.convolution:
+            x = conv(x)
+            #print(np.shape(x))
 
         for j in range(self.perceptron_size):
            if j == (self.perceptron_size - 1):
              break
            
            x = self.perceptron[j](x)
-           print(np.shape(x))
+           #print(np.shape(x))
         
         logits = self.perceptron[-1](x)
-        print(np.shape(logits))
+        #print(np.shape(logits))
         return logits
     
 
     def back_propagation(self, output, y):
-       loss = nn.MSELoss()
-       loss = loss(output,y)
+       loss_fn = nn.CrossEntropyLoss()
+       loss = loss_fn(output,y)
        optimizer = optim.SGD(self.parameters(),lr=0.01)
        #print(self.parameters())
 
-       loss.requires_grad = True
+       #loss.requires_grad = True
+       optimizer.zero_grad()
        loss.backward()
+
        optimizer.step()
+       #optimizer.zero_grad()
+
+       print(list(self.convolution[0][0].parameters())[-1].grad)
+
        
        
 x = load.x_test[0]
@@ -101,9 +107,10 @@ x = pt.tensor(x,dtype=pt.float32)
 x = pt.reshape(x,(1,1,28,28))
 #print(x.shape)
 model = SCNN(1,8,(128,64,10),2,3136)#.to(device)
-output = pt.argmax(model.forward_propagation(x))
+#output = pt.argmax(model.forward_propagation(x))
+output = model.forward_propagation(x)
 print(output)
-print(len(list(model.parameters())))
+#print(len(list(model.parameters())))
 #for name, param in model.named_parameters():
    #print(f"Layer: {name} | Size: {param.size()} | Values : {param[:2]} \n")
-model.back_propagation(output,pt.tensor(load.y_test[0]).float())
+model.back_propagation(output,pt.tensor([load.y_test[0]],dtype=pt.long))
