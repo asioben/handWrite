@@ -15,6 +15,8 @@ import load
 
 import nn as util
 
+import matplotlib.pyplot as plt
+
 #device = pt.accelerator.current_accelerator().type if pt.accelerator.is_available() else "cpu"
 #print(f"Using {device} device")
 
@@ -33,7 +35,7 @@ class SCNN(nn.Module):
              channel_size = channel
           convolution = nn.Sequential(
             nn.Conv2d(in_channels=channel_size,out_channels=tmp_filter_size*2,kernel_size=3,stride=1,padding=1),
-            #nn.BatchNorm2d(tmp_filter_size),
+            nn.BatchNorm2d(tmp_filter_size*2),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2),
            )
@@ -97,6 +99,7 @@ class SCNN(nn.Module):
        loss.backward()
 
        optimizer.step()
+       self.loss += loss.item()
        #optimizer.zero_grad()
 
        #print(list(self.convolution[0][0].parameters())[-1].grad)
@@ -107,7 +110,8 @@ class SCNN(nn.Module):
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.epoch = epoch
-        self.trained = True
+        #self.trained = True
+        self.loss = 0
         epochs_text = []
         for epoch in range(self.epoch):
             permutation = pt.randperm(len(self.X))
@@ -115,9 +119,9 @@ class SCNN(nn.Module):
             self.y = util.shuffle_dataset(self.y,permutation)
             y_true = util.transform_labels(self.y)
             number_batches = len(self.X) // self.batch_size
-            model_accuracy = []
+            losses = []
             for j in range(number_batches):
-                print(epoch,j)
+                #print(epoch,j)
                 key = j * self.batch_size #where to chop the batch
                 X_batch = pt.tensor(self.X[key:key+self.batch_size]).float()
                 X_batch = pt.reshape(X_batch,[60,1,28,28])
@@ -127,35 +131,43 @@ class SCNN(nn.Module):
                 y_batch_true = pt.transpose(y_batch_true,-1,0)
                 y = self.forward_propagation(X_batch)
                 self.back_propagation(y,y_batch)
-                model_accuracy.append(accuracy(y,y_batch_true))
-                if((j % 100) == 0):
-                    network_accuracy = pt.mean(pt.tensor(model_accuracy)) * 100
-                    text = "Train step (" + str(j) + "): " + str(network_accuracy) + ("%")
+                if((j % 200) == 0):
+                    text = "Train step (" + str(j) + "): " + " Loss: " + str(self.loss / 100)
                     print(text)
-            network_accuracy = pt.mean(pt.tensor(model_accuracy)) * 100
-            text = "Epoch (" + str(epoch) + "): " + str(network_accuracy) + ("%")
+                    losses.append((self.loss/100))
+                    self.loss = 0
+            text = "Epoch (" + str(epoch) + "): " + " Loss: " + str(losses[-1] / 100)
+            self.loss = 0
             epochs_text.append(text)
             print(text)
             print("//////////////////////////////////")
         for z in range(len(epochs_text)):
             print(epochs_text[z])
-
-#utility function
-def accuracy(output,label):
-    output = output.T
-    i = 0 
-    success = 0
-    for y in output:
-        digit = pt.argmax(y) #this function helps get the digit by finding the indices which contains the number with the highest probability
-        if digit == label[i]:
-            success += 1
-        i += 1
-    return success/output.shape[0]       
+        plt.plot(losses, label="Training Loss")
+        plt.title('Training Loss Curve')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()      
        
 x = load.x_test[0]
+print(len(load.x_test))
 #load.show_img([load.x_test[0]],"...")
 x = pt.tensor(x,dtype=pt.float32)
 x = pt.reshape(x,(1,1,28,28))
 #print(x.shape)
 model = SCNN(1,8,(128,64,10),2,3136)#.to(device)
 model.train(load.x_train,load.y_train,0.01,60,16)
+success = 0
+for i in range(10000):
+   x = load.x_test[i]
+   x = pt.tensor(x,dtype=pt.float32)
+   x = pt.reshape(x,(1,1,28,28)) 
+   output = pt.argmax(model.forward_propagation(x))
+   if(output == pt.tensor(load.y_test[i])):
+      success += 1
+   #print(output,load.y_test[i])
+
+print((success/100))
+
+
