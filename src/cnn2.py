@@ -13,6 +13,8 @@ import numpy as np
 #loading library
 import load
 
+import nn as util
+
 #device = pt.accelerator.current_accelerator().type if pt.accelerator.is_available() else "cpu"
 #print(f"Using {device} device")
 
@@ -87,7 +89,7 @@ class SCNN(nn.Module):
     def back_propagation(self, output, y):
        loss_fn = nn.CrossEntropyLoss()
        loss = loss_fn(output,y)
-       optimizer = optim.SGD(self.parameters(),lr=0.01)
+       optimizer = optim.SGD(self.parameters(),lr=self.learning_rate)
        #print(self.parameters())
 
        #loss.requires_grad = True
@@ -97,9 +99,58 @@ class SCNN(nn.Module):
        optimizer.step()
        #optimizer.zero_grad()
 
-       print(list(self.convolution[0][0].parameters())[-1].grad)
+       #print(list(self.convolution[0][0].parameters())[-1].grad)
 
-       
+    def train(self,X,y,learning_rate,batch_size,epoch):
+        self.X = X #input
+        self.y = y #output
+        self.learning_rate = learning_rate
+        self.batch_size = batch_size
+        self.epoch = epoch
+        self.trained = True
+        epochs_text = []
+        for epoch in range(self.epoch):
+            permutation = pt.randperm(len(self.X))
+            self.X = util.shuffle_dataset(self.X,permutation)
+            self.y = util.shuffle_dataset(self.y,permutation)
+            y_true = util.transform_labels(self.y)
+            number_batches = len(self.X) // self.batch_size
+            model_accuracy = []
+            for j in range(number_batches):
+                print(epoch,j)
+                key = j * self.batch_size #where to chop the batch
+                X_batch = pt.tensor(self.X[key:key+self.batch_size]).float()
+                X_batch = pt.reshape(X_batch,[60,1,28,28])
+                #X_batch = pt.transpose(X_batch,-1,0)
+                y_batch = pt.tensor(y_true[key:key+self.batch_size])
+                y_batch_true = pt.tensor(self.y[key:key+self.batch_size])
+                y_batch_true = pt.transpose(y_batch_true,-1,0)
+                y = self.forward_propagation(X_batch)
+                self.back_propagation(y,y_batch)
+                model_accuracy.append(accuracy(y,y_batch_true))
+                if((j % 100) == 0):
+                    network_accuracy = pt.mean(pt.tensor(model_accuracy)) * 100
+                    text = "Train step (" + str(j) + "): " + str(network_accuracy) + ("%")
+                    print(text)
+            network_accuracy = pt.mean(pt.tensor(model_accuracy)) * 100
+            text = "Epoch (" + str(epoch) + "): " + str(network_accuracy) + ("%")
+            epochs_text.append(text)
+            print(text)
+            print("//////////////////////////////////")
+        for z in range(len(epochs_text)):
+            print(epochs_text[z])
+
+#utility function
+def accuracy(output,label):
+    output = output.T
+    i = 0 
+    success = 0
+    for y in output:
+        digit = pt.argmax(y) #this function helps get the digit by finding the indices which contains the number with the highest probability
+        if digit == label[i]:
+            success += 1
+        i += 1
+    return success/output.shape[0]       
        
 x = load.x_test[0]
 #load.show_img([load.x_test[0]],"...")
@@ -107,10 +158,4 @@ x = pt.tensor(x,dtype=pt.float32)
 x = pt.reshape(x,(1,1,28,28))
 #print(x.shape)
 model = SCNN(1,8,(128,64,10),2,3136)#.to(device)
-#output = pt.argmax(model.forward_propagation(x))
-output = model.forward_propagation(x)
-print(output)
-#print(len(list(model.parameters())))
-#for name, param in model.named_parameters():
-   #print(f"Layer: {name} | Size: {param.size()} | Values : {param[:2]} \n")
-model.back_propagation(output,pt.tensor([load.y_test[0]],dtype=pt.long))
+model.train(load.x_train,load.y_train,0.01,60,16)
