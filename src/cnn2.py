@@ -104,7 +104,7 @@ class SCNN(nn.Module):
 
        #print(list(self.convolution[0][0].parameters())[-1].grad)
 
-    def train(self,X,y,learning_rate,batch_size,epoch):
+    def train_(self,X,y,learning_rate,batch_size,epoch):
         self.X = X #input
         self.y = y #output
         self.learning_rate = learning_rate
@@ -150,24 +150,35 @@ class SCNN(nn.Module):
         plt.legend()
         plt.show()      
        
-x = load.x_test[0]
-print(len(load.x_test))
-#load.show_img([load.x_test[0]],"...")
-x = pt.tensor(x,dtype=pt.float32)
-x = pt.reshape(x,(1,1,28,28))
-#print(x.shape)
-model = SCNN(1,8,(128,64,10),2,3136)#.to(device)
-model.train(load.x_train,load.y_train,0.01,60,16)
-success = 0
-for i in range(10000):
-   x = load.x_test[i]
-   x = pt.tensor(x,dtype=pt.float32)
-   x = pt.reshape(x,(1,1,28,28)) 
-   output = pt.argmax(model.forward_propagation(x))
-   if(output == pt.tensor(load.y_test[i])):
-      success += 1
-   #print(output,load.y_test[i])
+def main():
+   trained = False
+   if trained == True:
+    model = SCNN(1,8,(128,64,10),2,3136)#.to(device)
+    model.train_(load.x_train,load.y_train,0.01,60,16)
+    success = 0
+    for i in range(10000):
+      x = load.x_test[i]
+      x = pt.tensor(x,dtype=pt.float32)
+      x = pt.reshape(x,(1,1,28,28)) 
+      output = pt.argmax(model.forward_propagation(x))
+      if(output == pt.tensor(load.y_test[i])):
+        success += 1
+      #print(output,load.y_test[i])
 
-print((success/100))
+      print((success/100))
 
+      pt.save(model,"scnn_model.pth")
+      print("Model Saved")
+
+   else:
+    model = pt.load("scnn_model.pth",weights_only=False)
+    x = load.x_test[0]
+    print(len(load.x_test))
+    #load.show_img([load.x_test[0]],"...")
+    x = pt.tensor(x,dtype=pt.float32)
+    x = pt.reshape(x,(1,1,28,28))
+    print(pt.argmax(model.forward_propagation(x)))
+
+if __name__ == "__main__":
+   main()
 

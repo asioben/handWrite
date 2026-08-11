@@ -9,7 +9,10 @@ import numpy as np
 import sys
 
 #dependacies
-import model
+#import model
+import torch
+from cnn2 import SCNN
+#import cnn2 as model
 
 #const
 HEIGHT = 600
@@ -90,10 +93,13 @@ def main():
     squares = []
 
     #load the neural network
-    network = model.load_network("nn_model.json",1)
+    #network = model.load_network("nn_model.json",1)
+    #state_dict = torch.load("scnn_model.pth",weights_only=False)
+    network = torch.load("scnn_model.pth",weights_only=False)
+    network.eval()
 
     #the canvas you drew
-    pixels = np.zeros((784,1))
+    pixels = torch.zeros((784,1))
 
     #loop
     while True:
@@ -106,13 +112,15 @@ def main():
                 #squares = []
                 pixels = create_input(pixels,squares,translation)
                 #print(np.reshape(pixels,(28,28)))
+                pixels = torch.reshape(pixels,[1,1,28,28])
                 output = network.forward_propagation(pixels)
-                digit = np.argmax(output)
+                #digit = np.argmax(output)
+                digit = torch.argmax(output)
                 print("Prediction: " + str(digit))
                 #print("True: " + str(model.load.y_test[6020]))
                 #print(pixels)
                 #print("/////////////////////////////")
-                pixels = np.zeros((784,1))
+                pixels = torch.zeros((784,1))
                 print(output)
             if event.key == pygame.K_BACKSPACE:
                 squares = []
