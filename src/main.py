@@ -9,7 +9,7 @@ import numpy as np
 import sys
 
 #dependacies
-#import model
+import model
 import torch
 from cnn2 import SCNN
 #import cnn2 as model
@@ -81,7 +81,7 @@ def create_input(pixels,squares,translation):
 
 
 #main function
-def main():
+def run(network, mode, model_type):
     #init pygame
     pygame.init()
 
@@ -95,11 +95,13 @@ def main():
     #load the neural network
     #network = model.load_network("nn_model.json",1)
     #state_dict = torch.load("scnn_model.pth",weights_only=False)
-    network = torch.load("scnn_model_2.pth",weights_only=False)
-    network.eval()
 
     #the canvas you drew
-    pixels = torch.zeros((784,1))
+    pixels = []
+    if model_type == 0:
+        pixels = np.zeros((784,1))
+    else:
+       pixels = torch.zeros((784,1))
 
     #loop
     while True:
@@ -111,16 +113,18 @@ def main():
             if event.key == pygame.K_SPACE:
                 #squares = []
                 pixels = create_input(pixels,squares,translation)
-                #print(np.reshape(pixels,(28,28)))
-                pixels = torch.reshape(pixels,[1,1,28,28])
-                output = network.forward_propagation(pixels)
-                #digit = np.argmax(output)
-                digit = torch.argmax(output)
+                digit = -1
+                if model_type == 0:
+                  output = network.forward_propagation(pixels)
+                  digit = np.argmax(output)
+                  pixels = np.zeros((784,1))
+
+                else:
+                   digit = torch.argmax(output)
+                   pixels = torch.reshape(pixels,[1,1,28,28])
+                   output = network.forward_propagation(pixels)
+                   pixels = torch.zeros((784,1))
                 print("Prediction: " + str(digit))
-                #print("True: " + str(model.load.y_test[6020]))
-                #print(pixels)
-                #print("/////////////////////////////")
-                pixels = torch.zeros((784,1))
                 print(output)
             if event.key == pygame.K_BACKSPACE:
                 squares = []
@@ -160,6 +164,114 @@ def main():
      for square in squares:
         pygame.draw.rect(renderer,(0,0,0),square,0)
      pygame.display.update()
+
+menu = [
+    "Main Menu",
+    "0: Quit",
+    "1: Model",
+    "2: Test",
+    "3: Run"
+]
+
+models_menu = [
+    "Choose your model:",
+    "1: Neural Network (NN)",
+    "2: Convolutional Neural Network (CNN)",
+    "3: Superior Convolutional Neural Network (SCNN)",
+    "4: Superior Grayscale Convolutional Neural Network (SCNN)"
+    "0: Go Back -\__:-:_/-"
+]
+
+models_name = [
+    "Neural Network (NN)",
+    "Convolutional Neural Network (CNN)",
+    "Superior Convolutional Neural Network (SCNN)",
+    "Superior Grayscale Convolutional Neural Network (SCNN)"
+    "Nothing :("
+]
+
+model_filepaths = [
+    "nn_model.json",
+    "cnn_model.json",
+    "scnn_model.pth",
+    "scnn_model_2.pth"
+]
+
+def main():
+    network = None
+    menu_command = -1
+    model_command = -1
+    current_model = -1
+    mode = -1
+    #if mode == 0, we are just running
+    #if mode == 1, we are testing
+    model_type = -1
+    #if model_type == 0: Numpy
+    #if model_type == 1: Pytorch
+
+    while True:
+        print("We are currently using: ")
+        print("We are using : ")
+        current_model = model_command
+        if current_model != -1:
+            current_model = model_command - 1 
+        print(models_name[current_model])
+        if(menu_command != 1):
+            model.print_(menu)
+            menu_command = model.test_NAN(menu_command,"What's your command: ",menu)
+            model.number_expectation(menu,0,4,menu_command)
+        #print(command)
+
+        if menu_command == 0:
+            print("Bye...")
+            break
+
+        elif menu_command == 1:
+            choose_model = True
+            while choose_model == True:
+                model.print_(models_menu)
+                model_command = model.test_NAN(model_command,"Whats's your command: ",models_menu)
+                model.number_expectation(models_menu,0,2,model_command)
+                
+                if model_command == 0:
+                    print("Bye")
+                    choose_model = False
+                    menu_command = -1
+                elif model_command == 1:
+                    network = model.load_network(model_filepaths[0],1)
+                    print("The model in usage is the Multilayer Perceptron / Neural Network (NN) ")
+                    model_type = 0
+                    choose_model = False
+                    menu_command = -1
+                elif model_command == 2:
+                    network = model.load_network(model_filepaths[1],2)
+                    print("The model in usage is the Multilayer Perceptron + Convolutional Neural Network (CNN) ")
+                    choose_model = False
+                    menu_command = -1
+                    model_type = 0
+                elif model_command == 3:
+                    network = torch.load(model_filepaths[2],weights_only=False)
+                    network.eval()
+                    print("The model in usage is the Superior Multilayer Perceptron + Convolutional Neural Network (SCNN) ")
+                    choose_model = False
+                    menu_command = -1
+                    model_type = 1
+                elif model_command == 4:
+                    network = torch.load(model_filepaths[3],weights_only=False)
+                    network.eval()
+                    print("The model in usage is the Superior Multilayer Perceptron + Convolutional Neural Network (SCNN) ")
+                    choose_model = False
+                    menu_command = -1
+                    model_type = 1
+        
+        elif menu_command == 2:
+            mode = 1
+            run(network,mode,model_type)
+
+        elif menu_command == 3:
+            mode = 0
+            run(network,mode,model_type)
+
     
 if __name__ == "__main__":
     main()

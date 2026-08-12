@@ -21,7 +21,7 @@ y_test = load.y_test
 errorCode = "Invalid input !"
 
 menu = [
-        "Menu:",
+        "Model Menu:",
         "0: Quit",
         "1: Model",
         "2: Train",
