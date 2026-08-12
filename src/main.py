@@ -120,9 +120,9 @@ def run(network, mode, model_type):
                   pixels = np.zeros((784,1))
 
                 else:
-                   digit = torch.argmax(output)
                    pixels = torch.reshape(pixels,[1,1,28,28])
                    output = network.forward_propagation(pixels)
+                   digit = torch.argmax(output)
                    pixels = torch.zeros((784,1))
                 print("Prediction: " + str(digit))
                 print(output)
@@ -178,7 +178,7 @@ models_menu = [
     "1: Neural Network (NN)",
     "2: Convolutional Neural Network (CNN)",
     "3: Superior Convolutional Neural Network (SCNN)",
-    "4: Superior Grayscale Convolutional Neural Network (SCNN)"
+    "4: Superior Grayscale Convolutional Neural Network (SCNN)",
     "0: Go Back -\__:-:_/-"
 ]
 
@@ -186,7 +186,7 @@ models_name = [
     "Neural Network (NN)",
     "Convolutional Neural Network (CNN)",
     "Superior Convolutional Neural Network (SCNN)",
-    "Superior Grayscale Convolutional Neural Network (SCNN)"
+    "Superior Grayscale Convolutional Neural Network (SCNN)",
     "Nothing :("
 ]
 
