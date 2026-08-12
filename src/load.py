@@ -45,7 +45,7 @@ class Loader(object):
         for pixels in x:
             pixels /= 255
             for i in range(len(pixels)):
-                if pixels[i] > 0.0:
+                if pixels[i] >= 1.0:
                    pixels[i] = 1.0
         return x
         

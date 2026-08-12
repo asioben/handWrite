@@ -4,10 +4,12 @@
 import load
 import nn
 import cnn
+import cnn2 
 
 #std lib
 import numpy as np
 import json
+import torch
 
 #data to train and test the model
 x_train = load.x_train
@@ -31,18 +33,21 @@ models_menu = [
     "Choose your model:",
     "1: Multilayer Perceptron / Neural Network (NN)",
     "2: Convolutional Neural Network (CNN)",
+    "3: Superior Convolutional Neural Network (SCNN)"
     "0: Go Back -\__:-:_/-"
 ]
 
 models_name = [
     "Multilayer Perceptron / Neural Network (NN)",
     "Convolutional Neural Network (CNN)",
+    "Superior Convolutional Neural Network (SCNN)",
     "Nothing :("
 ]
 
 model_filepaths = [
     "nn_model.json",
     "cnn_model.json"
+    "scnn_model_half_gray.pth"
 ]
 
 def print_(to_Print):
@@ -76,6 +81,7 @@ def main():
     size = (784,128,64,10)
     nn_model = nn.NeuralNetwork(size)
     cnn_model = cnn.CNN(8,(400,64,10))
+    scnn_model = cnn2.SCNN(1,8,(128,64,10),2,3136)
     model = None
     menu_command = -1
     model_command = -1
@@ -115,7 +121,12 @@ def main():
                     menu_command = -1
                 elif model_command == 2:
                     model = cnn_model
-                    print("The model in usage is the Multilayer Convolutional Neural Network (CNN) ")
+                    print("The model in usage is the Multilayer Perceptron + Convolutional Neural Network (CNN) ")
+                    choose_model = False
+                    menu_command = -1
+                elif model_command == 3:
+                    model = scnn_model
+                    print("The model in usage is the Superior Multilayer Perceptron + Convolutional Neural Network (SCNN) ")
                     choose_model = False
                     menu_command = -1
                 
@@ -124,6 +135,9 @@ def main():
                 print("There is no model to train")
                 print("Go ahead choose one")
                 menu_command = 1
+            elif model_command == 3:
+                print("Model in training...")
+                model.train_(x_train,y_train,0.01,60,16)
             else:
                print("Model in training...")
                model.train(x_train,y_train,0.01,60,16)
@@ -136,19 +150,25 @@ def main():
             else:
                print("We gonna predict...")
                if(model.trained == False):
-                  model = load_network(model_filepaths[current_model],(current_model + 1))
+                  if(model_command == 3):
+                      model = torch.load("scnn_model.pth",weights_only=False)
+                      model.eval()
+                  else:
+                    model = load_network(model_filepaths[current_model],(current_model + 1))
                model.predict(x_test,y_test)
 
         elif menu_command == 4:
             if(model == None):
-                print("What model do you even whant to download")
+                print("What model do you even want to download")
                 print("Choose one before doing that")
                 menu_command = 1
             else:
                 filepath = model_filepaths[current_model]
                 check_file_and_write(filepath)
-            
-            model.download_network(filepath)
+                if(model_command == 3):
+                    torch.save(model,filepath)
+                else:
+                   model.download_network(filepath)
 
 #load a neural network
 

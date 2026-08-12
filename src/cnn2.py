@@ -70,6 +70,8 @@ class SCNN(nn.Module):
           for param in self.parameters():
             param.requires_grad = True
 
+        self.trained = False
+
 
     def forward_propagation(self, x):
         for conv in self.convolution:
@@ -110,7 +112,7 @@ class SCNN(nn.Module):
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.epoch = epoch
-        #self.trained = True
+        self.trained = True
         self.loss = 0
         epochs_text = []
         for epoch in range(self.epoch):
@@ -148,36 +150,44 @@ class SCNN(nn.Module):
         plt.xlabel('Epochs')
         plt.ylabel('Loss')
         plt.legend()
-        plt.show()      
+        plt.show() 
+
+    def predict(self,X,y):
+        indice = pt.randint(0,len(X),(1,1)) #image to recognize
+        img = pt.reshape(X[indice],(1,1,28,28))
+        output = self.forward_propagation(img)
+        digit = pt.argmax(output)
+        print("Prediction: " + str(digit))
+        print("Actual: "+ str(y[indice]))
+        title = str(indice) + " : " + str(y[indice])
+        load.show_img([img,img,img,img,img],[title,title,title,title,title])     
+
+    def test(self,X,y):
+       success = 0
+       for i in range(10000):
+         x = X[i]
+         x = pt.tensor(x,dtype=pt.float32)
+         x = pt.reshape(x,(1,1,28,28)) 
+         output = pt.argmax(self.forward_propagation(x))
+         if(output == pt.tensor(load.y_test[i])):
+           success += 1
+
+       print((success/100))
        
 def main():
    trained = False
    if trained == True:
     model = SCNN(1,8,(128,64,10),2,3136)#.to(device)
     model.train_(load.x_train,load.y_train,0.01,60,16)
-    success = 0
-    for i in range(10000):
-      x = load.x_test[i]
-      x = pt.tensor(x,dtype=pt.float32)
-      x = pt.reshape(x,(1,1,28,28)) 
-      output = pt.argmax(model.forward_propagation(x))
-      if(output == pt.tensor(load.y_test[i])):
-        success += 1
-      #print(output,load.y_test[i])
-
-      print((success/100))
+    
 
       pt.save(model,"scnn_model.pth")
       print("Model Saved")
 
    else:
     model = pt.load("scnn_model.pth",weights_only=False)
-    x = load.x_test[0]
-    print(len(load.x_test))
-    #load.show_img([load.x_test[0]],"...")
-    x = pt.tensor(x,dtype=pt.float32)
-    x = pt.reshape(x,(1,1,28,28))
-    print(pt.argmax(model.forward_propagation(x)))
+    model.eval()
+    model.predict(pt.tensor(load.x_test).float(),pt.tensor(load.y_test).float())
 
 if __name__ == "__main__":
    main()
