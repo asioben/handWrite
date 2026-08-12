@@ -98,7 +98,4 @@ if __name__ == '__main__':
     print(x_test[6020])
 
 """
-ALSO TRY TRAINING WITH 
-GRAYSCALE
-FOR NOW, ITS ONLY WITH 0 AND 1
 """

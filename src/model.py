@@ -33,7 +33,7 @@ models_menu = [
     "Choose your model:",
     "1: Multilayer Perceptron / Neural Network (NN)",
     "2: Convolutional Neural Network (CNN)",
-    "3: Superior Convolutional Neural Network (SCNN)"
+    "3: Superior Convolutional Neural Network (SCNN)",
     "0: Go Back -\__:-:_/-"
 ]
 
@@ -46,8 +46,8 @@ models_name = [
 
 model_filepaths = [
     "nn_model.json",
-    "cnn_model.json"
-    "scnn_model_half_gray.pth"
+    "cnn_model.json",
+    "scnn_model_2.pth"
 ]
 
 def print_(to_Print):
@@ -138,6 +138,7 @@ def main():
             elif model_command == 3:
                 print("Model in training...")
                 model.train_(x_train,y_train,0.01,60,16)
+                model.test(x_test,y_test)
             else:
                print("Model in training...")
                model.train(x_train,y_train,0.01,60,16)
@@ -155,7 +156,7 @@ def main():
                       model.eval()
                   else:
                     model = load_network(model_filepaths[current_model],(current_model + 1))
-               model.predict(x_test,y_test)
+                  model.predict(x_test,y_test)
 
         elif menu_command == 4:
             if(model == None):

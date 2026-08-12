@@ -153,6 +153,8 @@ class SCNN(nn.Module):
         plt.show() 
 
     def predict(self,X,y):
+        X = pt.tensor(X).float()
+        y = pt.tensor(y).float()
         indice = pt.randint(0,len(X),(1,1)) #image to recognize
         img = pt.reshape(X[indice],(1,1,28,28))
         output = self.forward_propagation(img)
@@ -175,20 +177,30 @@ class SCNN(nn.Module):
        print((success/100))
        
 def main():
-   trained = False
-   if trained == True:
-    model = SCNN(1,8,(128,64,10),2,3136)#.to(device)
-    model.train_(load.x_train,load.y_train,0.01,60,16)
-    
-
-      pt.save(model,"scnn_model.pth")
-      print("Model Saved")
-
-   else:
-    model = pt.load("scnn_model.pth",weights_only=False)
+    model = pt.load("scnn_model_2.pth",weights_only=False)
     model.eval()
-    model.predict(pt.tensor(load.x_test).float(),pt.tensor(load.y_test).float())
+    model.test(load.x_test,load.y_test)
+    #model.predict(load.x_test,load.y_test)
 
 if __name__ == "__main__":
    main()
 
+"""
+I train two model with 
+two types of the same data:
+
+Grayscale
+Binary (Black and white data)
+
+
+The binary model: scnn_model.pth
+
+Have 98.21% accuracy with binary data
+Have 97.62% accuracy with grayscale data
+
+
+The grayscale model: scnn_model_2.pth
+
+Have 96.57% accuracy with binary data
+Have 98.61% accuracy with grayscale data
+"""

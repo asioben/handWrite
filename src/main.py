@@ -95,7 +95,7 @@ def main():
     #load the neural network
     #network = model.load_network("nn_model.json",1)
     #state_dict = torch.load("scnn_model.pth",weights_only=False)
-    network = torch.load("scnn_model.pth",weights_only=False)
+    network = torch.load("scnn_model_2.pth",weights_only=False)
     network.eval()
 
     #the canvas you drew
