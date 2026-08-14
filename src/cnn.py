@@ -230,12 +230,16 @@ def back_reLU(a, b):
    return a * (b > 0)
 
 """
-WHAT I'VE DONE SO FAR:
--CLEANUP CONV OUTPUT CALCULATION
--ADD BATCH SIZE DIMENSION
-for the moment every shape seem correct 
-"""
-"""
-WHAT WE GONNA DO
--TEST AND TRAIN !!!!!!!!
+Ok this model is
+the ugly duckling
+of my 3(actually 4 kinda)
+models I have 
+his acccuracy during training 
+was around 84%
+and against the test dataset
+it's 86.29%
+yay its kind of bad but
+it's homemade (way more than NN)
+it's better to use pytroch for your CNN
+a CNN from scracth is a bit harder than NN
 """

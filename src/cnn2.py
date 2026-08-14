@@ -164,14 +164,14 @@ class SCNN(nn.Module):
         title = str(indice) + " : " + str(y[indice])
         load.show_img([img,img,img,img,img],[title,title,title,title,title])     
 
-    def test(self,X,y):
+    def test(self,X,y,size):
        success = 0
-       for i in range(10000):
+       for i in range(size):
          x = X[i]
          x = pt.tensor(x,dtype=pt.float32)
          x = pt.reshape(x,(1,1,28,28)) 
          output = pt.argmax(self.forward_propagation(x))
-         if(output == pt.tensor(load.y_test[i])):
+         if(output == pt.tensor(y[i])):
            success += 1
 
        print((success/100))

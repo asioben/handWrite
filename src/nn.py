@@ -117,6 +117,17 @@ class NeuralNetwork:
         }
         with open(filepath,"w") as file:
             json.dump(data,file)
+    
+    def test(self,X,y,size):
+        success = 0
+        for i in range(size):
+            x = X[i]
+            x = np.reshape(x,(784,1))
+            output = np.argmax(self.forward_propagation(x))
+            if(output == y[i]):
+                success += 1
+
+        print(((success/size) * 100))
 
 #some miscellaneous function to compute
 #its just some mathematical function
@@ -152,3 +163,13 @@ def transform_labels(labels):
         array[label] = 1.0
         true.append(array)
     return true
+
+"""
+My current NN (Multilayer Perceptron)
+(or Neural Network)
+had 99.71666666666667% accuracy during its
+last epoch (in its training)
+against the test dataset
+He have a 94.39% accuracy
+Very good for a handmade model built from scratch
+"""
