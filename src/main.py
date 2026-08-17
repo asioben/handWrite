@@ -79,9 +79,29 @@ def create_input(pixels,squares,translation):
         pixels[pixel] = 1.0
     return pixels
 
+""""def numpy_models(network, pixels):
+    output = network.forward_propagation(pixels)
+    digit = np.argmax(output)
+    pixels = np.zeros((784,1))
+    return digit, output, pixels
+
+def torch_models(network, pixels):
+    pixels = torch.reshape(pixels,[1,1,28,28])
+    output = network.forward_propagation(pixels)
+    digit = torch.argmax(output)
+    pixels = torch.zeros((784,1))
+    return digit, output, pixels"""
 
 #main function
 def run(network, mode, model_type):
+    #font
+    font1 = None
+    font = None
+    texts = []
+    text_rects = []
+    text1 = None
+    text_rect = None
+
     #init pygame
     pygame.init()
 
@@ -92,16 +112,31 @@ def run(network, mode, model_type):
     #init squares
     squares = []
 
-    #load the neural network
-    #network = model.load_network("nn_model.json",1)
-    #state_dict = torch.load("scnn_model.pth",weights_only=False)
-
     #the canvas you drew
     pixels = []
     if model_type == 0:
         pixels = np.zeros((784,1))
     else:
        pixels = torch.zeros((784,1))
+
+    if mode == 1:
+        font1 = pygame.font.SysFont('Arial',40)
+        font = pygame.font.SysFont('Arial',20)
+        text1 = font1.render("Test Mode",True,(0,0,0))
+        texts.append(font.render("Number: ",True,(0,0,0)))
+        texts.append(font.render("NN: ",True,(0,0,0)))
+        texts.append(font.render("CNN: ",True,(0,0,0)))
+        texts.append(font.render("SCNN 1: ",True,(0,0,0)))
+        texts.append(font.render("SCNN 2: ",True,(0,0,0)))
+        for i in range(len(texts)):
+            text_rects.append(texts[i].get_rect())
+            text_rects[i].x = 50
+            text_rects[i].y = 50 * i + 80
+            text_rects[i].w = 10
+            text_rects[i].h = 50
+        text_rect = text1.get_rect()
+        text_rect.x = 10
+        text_rect.y = 0
 
     #loop
     while True:
@@ -110,22 +145,25 @@ def run(network, mode, model_type):
             pygame.quit()
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                #squares = []
-                pixels = create_input(pixels,squares,translation)
-                digit = -1
-                if model_type == 0:
-                  output = network.forward_propagation(pixels)
-                  digit = np.argmax(output)
-                  pixels = np.zeros((784,1))
+            if (event.key == pygame.K_SPACE):
+                if mode == 0:
+                 #squares = []
+                 pixels = create_input(pixels,squares,translation)
+                 digit = -1
+                 if model_type == 0:
+                    output = network.forward_propagation(pixels)
+                    digit = np.argmax(output)
+                    pixels = np.zeros((784,1))
+                 #digit, output, pixels = numpy_models(network,pixels)
 
-                else:
-                   pixels = torch.reshape(pixels,[1,1,28,28])
-                   output = network.forward_propagation(pixels)
-                   digit = torch.argmax(output)
-                   pixels = torch.zeros((784,1))
-                print("Prediction: " + str(digit))
-                print(output)
+                 else:
+                    pixels = torch.reshape(pixels,[1,1,28,28])
+                    output = network.forward_propagation(pixels)
+                    digit = torch.argmax(output)
+                    pixels = torch.zeros((784,1))
+                   #digit, output, pixels = torch_models(network,pixels)
+                 print("Prediction: " + str(digit))
+                 print(output)
             if event.key == pygame.K_BACKSPACE:
                 squares = []
             
@@ -161,8 +199,14 @@ def run(network, mode, model_type):
         if(mousePos[0] != -1): 
             findSquare(mousePos,squares)
 
+            
+
      for square in squares:
         pygame.draw.rect(renderer,(0,0,0),square,0)
+
+     renderer.blit(text1,text_rect)
+     for j in range(len(texts)):
+         renderer.blit(texts[j],text_rects[j])
      pygame.display.update()
 
 menu = [
@@ -265,12 +309,23 @@ def main():
                     model_type = 1
         
         elif menu_command == 2:
-            mode = 1
-            run(network,mode,model_type)
+              networks = [
+                  model.load_network(model_filepaths[0],1),
+                  model.load_network(model_filepaths[1],2),
+                  torch.load(model_filepaths[2],weights_only=False),
+                  torch.load(model_filepaths[3],weights_only=False)
+              ]
+              mode = 1
+              run(networks,mode,model_type)
 
         elif menu_command == 3:
-            mode = 0
-            run(network,mode,model_type)
+            if(network == None):
+                print("We don't have a model to make prediction with")
+                print("Please, consider choosing one before !")
+                menu_command = 1
+            else:
+              mode = 0
+              run(network,mode,model_type)
 
     
 if __name__ == "__main__":

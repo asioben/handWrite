@@ -74,7 +74,8 @@ class NeuralNetwork:
             number_batches = len(self.X) // self.batch_size
             model_accuracy = []
             for j in range(number_batches):
-                print(epoch,j)
+                if(self.cnn == True):
+                    print(epoch,j)
                 key = j * self.batch_size #where to chop the batch
                 X_batch = self.X[key:key+self.batch_size]
                 X_batch = np.transpose(X_batch)
