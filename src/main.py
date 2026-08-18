@@ -100,7 +100,7 @@ models_list = [
 ]
 
 #main function
-def run(network, mode, model_type):
+def run(network, mode, model_type, network_):
     #font
     font1 = None
     font = None
@@ -146,6 +146,13 @@ def run(network, mode, model_type):
         text_rect = text1.get_rect()
         text_rect.x = 10
         text_rect.y = 0
+    
+    else:
+        font1 = pygame.font.SysFont('Arial',30)
+        text1 = font1.render(models_list[network_],True,(0,0,0))
+        text_rect = text1.get_rect()
+        text_rect.x = 30
+        text_rect.y = 100
 
     #loop
     while True:
@@ -173,6 +180,7 @@ def run(network, mode, model_type):
                     digit, output, pixels = torch_models(network,pixels)
                  print("Prediction: " + str(digit))
                  print(output)
+                 text1 = font1.render(models_list[network_] + str(int(digit)),True,(0,0,0))
 
                 else:
                     number += 1
@@ -236,11 +244,12 @@ def run(network, mode, model_type):
         pygame.draw.rect(renderer,(0,0,0),square,0)
 
      if mode == 1:
-     
-       renderer.blit(text1,text_rect)
+       
        for j in range(len(texts)):
          renderer.blit(texts[j],text_rects[j])
-         
+
+     renderer.blit(text1,text_rect)
+
      pygame.display.update()
 
 menu = [
@@ -350,7 +359,7 @@ def main():
                   torch.load(model_filepaths[3],weights_only=False)
               ]
               mode = 1
-              run(networks,mode,model_type)
+              run(networks,mode,model_type,-1)
 
         elif menu_command == 3:
             if(network == None):
@@ -359,7 +368,7 @@ def main():
                 menu_command = 1
             else:
               mode = 0
-              run(network,mode,model_type)
+              run(network,mode,model_type,current_model)
 
     
 if __name__ == "__main__":
