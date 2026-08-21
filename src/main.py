@@ -7,6 +7,7 @@ import numpy as np
 
 #std lib
 import sys
+import json
 
 #dependacies
 import model
@@ -46,15 +47,6 @@ def drawGrid(renderer):
 
           pygame.draw.line(renderer,(0,0,0),(begin_horizontal),(end_horizontal),1)
           pygame.draw.line(renderer,(0,0,0),(begin_vertical),(end_vertical),1)
-
-          """if i == 1:
-              i = number_of_squares 
-          begin_vertical = ((i*SQUARE_SIZE)+translation_x,translation_y)
-          end_vertical = ((i*SQUARE_SIZE)+translation_x,((number_of_squares)*SQUARE_SIZE)+translation_y)
-          begin_horizontal = (translation_x,(i*SQUARE_SIZE)+translation_y)
-          end_horizontal = (((number_of_squares)*SQUARE_SIZE) + translation_x,(i*SQUARE_SIZE)+translation_y)
-          pygame.draw.line(renderer,(0,0,0),begin_horizontal,end_horizontal,1)
-          pygame.draw.line(renderer,(0,0,0),begin_vertical,end_vertical,1)"""
 
         translation = [translation_x,translation_y]
         return translation
@@ -99,6 +91,33 @@ models_list = [
     "SCNN 2: "
 ]
 
+test_data_filepath = "test_data.json"
+
+def download_data(models_digits, filepath):
+    data = {
+        "NN": [int(d) for d in models_digits[0]],
+        "CNN": [int(d) for d in models_digits[1]],
+        "SCNN1": [int(d) for d in models_digits[2]],
+        "SCNN2": [int(d) for d in models_digits[3]]
+    }
+
+    with open(filepath,"w") as file:
+        json.dump(data,file)
+
+def load_data(filepath):
+    with open(filepath,"r") as file:
+        data = json.load(file)
+
+    models_digits = []
+    models_digits.append(data["NN"])
+    models_digits.append(data["CNN"])
+    models_digits.append(data["SCNN1"])
+    models_digits.append(data["SCNN2"])
+
+    models_digits = np.reshape(models_digits,(4,100))
+
+    return models_digits
+
 #main function
 def run(network, mode, model_type, network_):
     #font
@@ -125,10 +144,11 @@ def run(network, mode, model_type, network_):
 
     #the canvas you drew
     pixels = []
-    if model_type == 1:
-        pixels = torch.zeros((784,1))
-    else:
-       pixels = np.zeros((784,1))
+    torch_pixels = []
+
+    #loop, very important
+    loop = True
+    
 
     if mode == 1:
         font1 = pygame.font.SysFont('Arial',40)
@@ -139,13 +159,21 @@ def run(network, mode, model_type, network_):
         texts.append(font.render(models_list[1],True,(0,0,0)))
         texts.append(font.render(models_list[2],True,(0,0,0)))
         texts.append(font.render(models_list[3],True,(0,0,0)))
+
         for i in range(len(texts)):
             text_rects.append(texts[i].get_rect())
             text_rects[i].x = 50
             text_rects[i].y = 50 * i + 80
+            
         text_rect = text1.get_rect()
         text_rect.x = 10
         text_rect.y = 0
+
+        pixels = np.zeros((784,1))
+        torch_pixels = torch.zeros((784,1))
+
+        models_digits = np.full((4,100),-1)
+
     
     else:
         font1 = pygame.font.SysFont('Arial',30)
@@ -153,33 +181,32 @@ def run(network, mode, model_type, network_):
         text_rect = text1.get_rect()
         text_rect.x = 30
         text_rect.y = 100
+        
+        if model_type == 1:
+          pixels = torch.zeros((784,1))
+        else:
+          pixels = np.zeros((784,1))
 
     #loop
-    while True:
+    while loop:
      for event in pygame.event.get():
-        if event.type == QUIT:
+        """if event.type == QUIT:
             pygame.quit()
-            sys.exit()
-        elif event.type == pygame.KEYDOWN:
+            sys.exit()"""
+        if event.type == pygame.KEYDOWN:
             if (event.key == pygame.K_SPACE):
                 if mode == 0:
                  #squares = []
                  pixels = create_input(pixels,squares,translation)
                  digit = -1
                  if model_type == 0:
-                    """output = network.forward_propagation(pixels)
-                    digit = np.argmax(output)
-                    pixels = np.zeros((784,1))"""
                     print(pixels.shape)
                     digit, output, pixels = numpy_models(network,pixels)
 
                  else:
-                    """pixels = torch.reshape(pixels,[1,1,28,28])
-                    output = network.forward_propagation(pixels)
-                    digit = torch.argmax(output)
-                    pixels = torch.zeros((784,1))"""
                     print(pixels.shape)
                     digit, output, pixels = torch_models(network,pixels)
+
                  print("Prediction: " + str(digit))
                  print(output)
                  text1 = font1.render(models_list[network_] + str(int(digit)),True,(0,0,0))
@@ -187,30 +214,57 @@ def run(network, mode, model_type, network_):
                 else:
                     number += 1
                     iteration += 1
+        
                     if(number > 9):
                         number = 0
-                    torch_pixels = torch.zeros((784,1))
+
+                    if (iteration > 100):
+                        iteration = 101
+                        number = -1
+
                     torch_pixels = create_input(torch_pixels,squares,translation)
                     pixels = create_input(pixels,squares,translation)
                     digits = [-1,-1,-1,-1]
                     outputs = [None,None,None,None]
-                    #print(pixels.shape)
+
                     digits[0], outputs[0], pixels_ = numpy_models(network[0],pixels)
-                    #cant use the CNN model for some obscure reasons
                     digits[1], outputs[1], pixels_ = numpy_models(network[1],pixels)
                     digits[2], outputs[2], pixels_torch = torch_models(network[2],torch_pixels)
                     digits[3], outputs[3], pixels_torch = torch_models(network[3],torch_pixels)
+
                     pixels = pixels_
                     torch_pixels = pixels_torch
-                    text1 = font1.render("Test Mode " + "(" + str(iteration) + ")",True,(0,0,0))
-                    texts[0] = font.render("Number: " + str(number),True,(0,0,0))
+
+                    if number >= 0:
+                      text1 = font1.render("Test Mode " + "(" + str(iteration) + ")",True,(0,0,0))
+                      texts[0] = font.render("Number: " + str(number),True,(0,0,0))
+                    else:
+                        text1 = font1.render("Test Mode: Done",True,(0,0,0))
+                        texts[0] = font.render("Number: Done",True,(0,0,0))
+
                     print(iteration)
+
                     for n in range(4):
+                        if(number >= 0):
+                            models_digits[n][iteration - 1] = digits[n]
                         print("Prediction: " + str(digits[n]))
                         print(outputs[n])
                         texts[n + 1] = font.render(models_list[n] + str(int(digits[n])),True,(0,0,0))
+
             if event.key == pygame.K_BACKSPACE:
                 squares = []
+            
+        elif event.type == pygame.QUIT:
+            loop = False
+            pygame.quit()
+            if mode == 1:
+              print(models_digits)
+              return models_digits
+            else:
+                return None
+
+            #sys.exit()
+            
             
     
      renderer.fill((255,255,255))
@@ -365,7 +419,10 @@ def main():
                   torch.load(model_filepaths[3],weights_only=False)
               ]
               mode = 1
-              run(networks,mode,model_type,-1)
+              models_digits = run(networks,mode,model_type,-1)
+              #download_data(models_digits,test_data_filepath)
+              sys.exit()
+
 
         elif menu_command == 3:
             if(network == None):
@@ -373,8 +430,12 @@ def main():
                 print("Please, consider choosing one before !")
                 menu_command = 1
             else:
+              #models_digits = load_data(test_data_filepath)
+              #print(models_digits)
               mode = 0
               run(network,mode,model_type,current_model)
+              sys.exit()
+
 
     
 if __name__ == "__main__":
