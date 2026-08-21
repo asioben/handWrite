@@ -125,10 +125,10 @@ def run(network, mode, model_type, network_):
 
     #the canvas you drew
     pixels = []
-    if model_type == 0:
-        pixels = np.zeros((784,1))
+    if model_type == 1:
+        pixels = torch.zeros((784,1))
     else:
-       pixels = torch.zeros((784,1))
+       pixels = np.zeros((784,1))
 
     if mode == 1:
         font1 = pygame.font.SysFont('Arial',40)
@@ -170,6 +170,7 @@ def run(network, mode, model_type, network_):
                     """output = network.forward_propagation(pixels)
                     digit = np.argmax(output)
                     pixels = np.zeros((784,1))"""
+                    print(pixels.shape)
                     digit, output, pixels = numpy_models(network,pixels)
 
                  else:
@@ -177,6 +178,7 @@ def run(network, mode, model_type, network_):
                     output = network.forward_propagation(pixels)
                     digit = torch.argmax(output)
                     pixels = torch.zeros((784,1))"""
+                    print(pixels.shape)
                     digit, output, pixels = torch_models(network,pixels)
                  print("Prediction: " + str(digit))
                  print(output)
@@ -187,15 +189,19 @@ def run(network, mode, model_type, network_):
                     iteration += 1
                     if(number > 9):
                         number = 0
+                    torch_pixels = torch.zeros((784,1))
+                    torch_pixels = create_input(torch_pixels,squares,translation)
                     pixels = create_input(pixels,squares,translation)
                     digits = [-1,-1,-1,-1]
                     outputs = [None,None,None,None]
+                    #print(pixels.shape)
                     digits[0], outputs[0], pixels_ = numpy_models(network[0],pixels)
                     #cant use the CNN model for some obscure reasons
-                    #digits[1], outputs[1], pixels_ = numpy_models(network[1],pixels)
-                    digits[2], outputs[2], pixels_ = torch_models(network[2],pixels)
-                    digits[3], outputs[3], pixels_ = torch_models(network[3],pixels)
+                    digits[1], outputs[1], pixels_ = numpy_models(network[1],pixels)
+                    digits[2], outputs[2], pixels_torch = torch_models(network[2],torch_pixels)
+                    digits[3], outputs[3], pixels_torch = torch_models(network[3],torch_pixels)
                     pixels = pixels_
+                    torch_pixels = pixels_torch
                     text1 = font1.render("Test Mode " + "(" + str(iteration) + ")",True,(0,0,0))
                     texts[0] = font.render("Number: " + str(number),True,(0,0,0))
                     print(iteration)
