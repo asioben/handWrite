@@ -222,7 +222,7 @@ def run(network, mode, model_type, network_):
                     digits[1], outputs[1], pixels_ = numpy_models(network[1],pixels)
                     digits[2], outputs[2], pixels_torch = torch_models(network[2],torch_pixels)
                     digits[3], outputs[3], pixels_torch = torch_models(network[3],torch_pixels)
-                    
+
 
                     if number >= 0:
                       drawings.append(pixels)
@@ -335,10 +335,10 @@ models_name = [
 ]
 
 model_filepaths = [
-    "nn_model.json",
-    "cnn_model.json",
-    "scnn_model.pth",
-    "scnn_model_2.pth"
+    "../network/nn_model.json",
+    "../network/cnn_model.json",
+    "../network/scnn_model.pth",
+    "../network/scnn_model_2.pth"
 ]
 
 def main():
@@ -433,7 +433,7 @@ def main():
 
               if(drawings.shape[0] == 100):
               
-                digits = Data("test_data.json",test_data)
+                digits = Data("../data/test_data.json",test_data)
                 digits.download()
                 data_ = digits.load()
                 data_digits = []
@@ -445,7 +445,7 @@ def main():
                 data_digits = np.reshape(data_digits,(4,100))
 
 
-                drawing = Data("drawings_data.json",drawings_data)
+                drawing = Data("../data/drawings_data.json",drawings_data)
                 drawing.download()
                 data_ = drawing.load()
                 data = [np.array(d) for d in data_["data"]]

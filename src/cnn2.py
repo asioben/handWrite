@@ -177,7 +177,7 @@ class SCNN(nn.Module):
        print((success/100))
        
 def main():
-    model = pt.load("scnn_model_2.pth",weights_only=False)
+    model = pt.load("../network/scnn_model_2.pth",weights_only=False)
     model.eval()
     model.test(load.x_test,load.y_test)
     #model.predict(load.x_test,load.y_test)

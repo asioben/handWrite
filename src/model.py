@@ -47,9 +47,9 @@ models_name = [
 ]
 
 model_filepaths = [
-    "nn_model.json",
-    "cnn_model.json",
-    "scnn_model_2.pth"
+    "../network/nn_model.json",
+    "../network/cnn_model.json",
+    "../network/scnn_model_2.pth"
 ]
 
 def print_(to_Print):
@@ -187,13 +187,13 @@ def main():
                 menu_command = 1
             else:
                 if(model_command == 3 and loaded == False):
-                      model = torch.load("scnn_model.pth",weights_only=False)
+                      model = torch.load("../network/scnn_model.pth",weights_only=False)
                       model.eval()
                 elif (loaded == False):
                     model = load_network(model_filepaths[current_model],(current_model + 1))
                 if(loaded == False):
                     loaded = True
-                print("Testin....")
+                print("Testing....")
                 model.test(x_test,y_test,10000)
 
 #load a neural network
