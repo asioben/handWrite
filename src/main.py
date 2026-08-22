@@ -210,7 +210,7 @@ def run(network, mode, model_type, network_):
                         number = 0
 
                     if (iteration > 100):
-                        iteration = 101
+                        iteration = 100
                         number = -1
 
                     torch_pixels = create_input(torch_pixels,squares,translation)
@@ -222,19 +222,18 @@ def run(network, mode, model_type, network_):
                     digits[1], outputs[1], pixels_ = numpy_models(network[1],pixels)
                     digits[2], outputs[2], pixels_torch = torch_models(network[2],torch_pixels)
                     digits[3], outputs[3], pixels_torch = torch_models(network[3],torch_pixels)
+                    
 
                     if number >= 0:
-                        drawings.append(pixels)
-
-                    pixels = pixels_
-                    torch_pixels = pixels_torch
-
-                    if number >= 0:
+                      drawings.append(pixels)
                       text1 = font1.render("Test Mode " + "(" + str(iteration) + ")",True,(0,0,0))
                       texts[0] = font.render("Number: " + str(number),True,(0,0,0))
                     else:
                         text1 = font1.render("Test Mode: Done",True,(0,0,0))
                         texts[0] = font.render("Number: Done",True,(0,0,0))
+
+                    pixels = pixels_
+                    torch_pixels = pixels_torch
 
                     print(iteration)
 
@@ -253,9 +252,6 @@ def run(network, mode, model_type, network_):
             pygame.quit()
 
             if mode == 1:
-              if iteration > 100:
-                  iteration = 100
-
               drawings = np.reshape(drawings,(iteration,784))
               #print(drawings)
               #print(models_digits)
