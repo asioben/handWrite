@@ -91,20 +91,27 @@ models_list = [
     "SCNN 2: "
 ]
 
-test_data_filepath = "test_data.json"
+class Data():
+    def __init__(self,filepath,data):
+        self.filepath = filepath
+        self.data = data
+    
+    def download(self):
+        with open(self.filepath,"w") as file:
+            json.dump(self.data,file)
 
-def download_data(models_digits, filepath):
-    data = {
-        "NN": [int(d) for d in models_digits[0]],
-        "CNN": [int(d) for d in models_digits[1]],
-        "SCNN1": [int(d) for d in models_digits[2]],
-        "SCNN2": [int(d) for d in models_digits[3]]
-    }
+    def load(self):
+        with open(self.filepath,"r") as file:
+            new_data = json.load(file)
 
-    with open(filepath,"w") as file:
-        json.dump(data,file)
+        return new_data
 
-def load_data(filepath):
+"""test_data_filepath = "test_data.json"
+
+drawings_data_filepath = "drawings_data.json"
+"""
+
+"""def load_test_data(filepath):
     with open(filepath,"r") as file:
         data = json.load(file)
 
@@ -116,7 +123,10 @@ def load_data(filepath):
 
     models_digits = np.reshape(models_digits,(4,100))
 
-    return models_digits
+    return models_digits"""
+
+#def load_
+
 
 #main function
 def run(network, mode, model_type, network_):
@@ -149,6 +159,8 @@ def run(network, mode, model_type, network_):
     #loop, very important
     loop = True
     
+    #for saving drawing in case
+    drawings = []
 
     if mode == 1:
         font1 = pygame.font.SysFont('Arial',40)
@@ -243,6 +255,8 @@ def run(network, mode, model_type, network_):
                         texts[0] = font.render("Number: Done",True,(0,0,0))
 
                     print(iteration)
+                    if number > -1:
+                        drawings.append(pixels)
 
                     for n in range(4):
                         if(number >= 0):
@@ -257,9 +271,16 @@ def run(network, mode, model_type, network_):
         elif event.type == pygame.QUIT:
             loop = False
             pygame.quit()
+
             if mode == 1:
+              if iteration > 100:
+                  iteration = 100
+
+              drawings = np.reshape(drawings,(iteration,784))
+              print(drawings)
               print(models_digits)
-              return models_digits
+              return models_digits, drawings
+            
             else:
                 return None
 
@@ -419,8 +440,20 @@ def main():
                   torch.load(model_filepaths[3],weights_only=False)
               ]
               mode = 1
-              models_digits = run(networks,mode,model_type,-1)
+              models_digits, drawings = run(networks,mode,model_type,-1)
+
+              test_data = {
+                "NN": [int(d) for d in models_digits[0]],
+                "CNN": [int(d) for d in models_digits[1]],
+                "SCNN1": [int(d) for d in models_digits[2]],
+                "SCNN2": [int(d) for d in models_digits[3]]
+               }
+              
+              drawings_data = {
+                  "data": [d.tolist() for d in drawings]
+              }
               #download_data(models_digits,test_data_filepath)
+              #download_data()
               sys.exit()
 
 
