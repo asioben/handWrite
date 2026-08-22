@@ -106,27 +106,6 @@ class Data():
 
         return new_data
 
-"""test_data_filepath = "test_data.json"
-
-drawings_data_filepath = "drawings_data.json"
-"""
-
-"""def load_test_data(filepath):
-    with open(filepath,"r") as file:
-        data = json.load(file)
-
-    models_digits = []
-    models_digits.append(data["NN"])
-    models_digits.append(data["CNN"])
-    models_digits.append(data["SCNN1"])
-    models_digits.append(data["SCNN2"])
-
-    models_digits = np.reshape(models_digits,(4,100))
-
-    return models_digits"""
-
-#def load_
-
 
 #main function
 def run(network, mode, model_type, network_):
@@ -244,6 +223,9 @@ def run(network, mode, model_type, network_):
                     digits[2], outputs[2], pixels_torch = torch_models(network[2],torch_pixels)
                     digits[3], outputs[3], pixels_torch = torch_models(network[3],torch_pixels)
 
+                    if number >= 0:
+                        drawings.append(pixels)
+
                     pixels = pixels_
                     torch_pixels = pixels_torch
 
@@ -255,8 +237,6 @@ def run(network, mode, model_type, network_):
                         texts[0] = font.render("Number: Done",True,(0,0,0))
 
                     print(iteration)
-                    if number > -1:
-                        drawings.append(pixels)
 
                     for n in range(4):
                         if(number >= 0):
@@ -277,8 +257,8 @@ def run(network, mode, model_type, network_):
                   iteration = 100
 
               drawings = np.reshape(drawings,(iteration,784))
-              print(drawings)
-              print(models_digits)
+              #print(drawings)
+              #print(models_digits)
               return models_digits, drawings
             
             else:
@@ -442,6 +422,10 @@ def main():
               mode = 1
               models_digits, drawings = run(networks,mode,model_type,-1)
 
+              drawings_data = {
+                  "data": [d.tolist() for d in drawings]
+              }
+
               test_data = {
                 "NN": [int(d) for d in models_digits[0]],
                 "CNN": [int(d) for d in models_digits[1]],
@@ -449,11 +433,30 @@ def main():
                 "SCNN2": [int(d) for d in models_digits[3]]
                }
               
-              drawings_data = {
-                  "data": [d.tolist() for d in drawings]
-              }
-              #download_data(models_digits,test_data_filepath)
-              #download_data()
+              print(drawings.shape)
+
+              if(drawings.shape[0] == 100):
+              
+                digits = Data("test_data.json",test_data)
+                digits.download()
+                data_ = digits.load()
+                data_digits = []
+                data_digits.append(data_["NN"])
+                data_digits.append(data_["CNN"])
+                data_digits.append(data_["SCNN1"])
+                data_digits.append(data_["SCNN2"])
+
+                data_digits = np.reshape(data_digits,(4,100))
+
+
+                drawing = Data("drawings_data.json",drawings_data)
+                drawing.download()
+                data_ = drawing.load()
+                data = [np.array(d) for d in data_["data"]]
+                print(np.shape(data))
+
+                print("Data collection is done !")
+              
               sys.exit()
 
 
@@ -463,8 +466,6 @@ def main():
                 print("Please, consider choosing one before !")
                 menu_command = 1
             else:
-              #models_digits = load_data(test_data_filepath)
-              #print(models_digits)
               mode = 0
               run(network,mode,model_type,current_model)
               sys.exit()
