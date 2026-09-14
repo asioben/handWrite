@@ -10,7 +10,7 @@ I wrote 4 models:
 - SCNN 1 (CNN trained with the help of binary data) with PyTorch
 - SCNN 2 (CNN trained with the help of grayscale data) with PyTorch
 
-I will test all these models in a drawing interface:
+I will test all these models in a drawing interface.
 
 <p align="center">
   <img src ="assets/drawing_interface.png" width="500" alt="drawing interface">
@@ -23,8 +23,18 @@ I used two types of data. One grayscale and one binary. First, for both of them 
 NN and CNN were trained on them because I made for a hypothesis that NN and CNN would perform better againt the drawing interface, if their data of training have the same type of data as the drawing grid vector.
 Binary data are like boolean data. If the pixel originally have a number higher than 0, it's new value is 1.
 
+<p align="center">
+  <img src ="assets/binary_example.png" width="500" alt="binary example">
+</p>
+
+
 ### Grayscale
 Grayscale is a float. The number the pixel can get is between 0 and 1, depending how dark the pixel is. I just normalized the value of the pixel. It's more rich in information than the binary one.
+
+<p align="center">
+  <img src ="assets/grayscale_example.png" width="500" alt="grayscale example">
+</p>
+
 
 ## Models
 
@@ -32,7 +42,7 @@ Grayscale is a float. The number the pixel can get is between 0 and 1, depending
 For the Neural Network, I used NumPy. For this model, I used ReLU as the nonlinear activation function. For the last neuron, I used softmax as my normalization function. As for the optimization, SGD was used for this model. It was a very simple NN that could reach 99% during training with 0.01 as a learning rate, 60 images for each batch and 16 epochs. But its accuracy with the drawing interface is barely 49%. I use binary data (MNIST) to train it.
 
 ### Convolutional Neural Network
-For the Convolutional Neural Network, I used NumPy. I made the filter calculation with NumPy, but this is not fast enough. In the next step, I used a reLU and MaxPool. I used reLU and convolutional_biases for "the learning of the filter operation". This convolutional step is slow due to the fact that it wasn't "optimized" with better linear algebra. But, for the multi layer perceptron, I used the same algorithm as the Neural Network. I trained a model with 0.01 as its learning rate, a batch of 10 images for 1 epoch. It gave almost 84% of accuracy. Its accuracy with the drawing interface is 50%. I use binary data (MNIST) to train it.
+For the Convolutional Neural Network, I used NumPy. I made the filter calculation with NumPy, but this is not fast enough. In the next step, I used a reLU and MaxPool. I used reLU and convolutional_biases for "the learning of the filter operation". This convolutional step is slow due to the fact that it wasn't "optimized" with better linear algebra. But, for the multi layer perceptron, I used the same algorithm as the Neural Network. SGD was also used for the training of the convolutional_biases. I trained a model with 0.01 as its learning rate, a batch of 10 images for 1 epoch. It gave almost 84% of accuracy. Its accuracy with the drawing interface is 50%. I use binary data (MNIST) to train it.
 
 ### Convolutional Neural Network with PyTorch
 I made two Convolutional Neural Networks with PyTorch, I called them SCNN1 and SCNN2. SCNN stands for Super Convolutional Neural Network.

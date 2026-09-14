@@ -94,9 +94,10 @@ for i in range(0,5):
     titles_show.append("Test:" + str(r) + "=> " + str(y_test[r]))
 
 if __name__ == '__main__':
-    show_img(images_show,titles_show)
+    #show_img(images_show,titles_show)
     #print(x_test[6020])
-    print(x_test[6020])
+    #print(x_test[6020])
+    show_img([x_train[0]],["Binary"])
 
 """
 """
