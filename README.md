@@ -1,5 +1,5 @@
 # HandWrite
-Hand write a numbe in the drawing interface (for the moment) and it recognizes it (kinda)
+Hand write a number in the drawing interface (for the moment) and it recognizes it (kinda)
 
 ## Description
 I used MNSIT data for training. It was a collection of handwritten digits (ranging from 0 to 9). I had 60 000 images as training data and 10 000 images as test data. Each image have a label.
@@ -11,6 +11,10 @@ I wrote 4 models:
 - SCNN 2 (CNN trained with the help of grayscale data) with PyTorch
 
 I will test all these models in a drawing interface:
+
+<p align="center">
+  <img src ="assets/drawing_interface.png" width="500" alt="drawing interface">
+</p>
 
 ## Data type
 I used two types of data. One grayscale and one binary. First, for both of them we have a vector of 784 numbers, each representing the level of darkness of a pixel.
