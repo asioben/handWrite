@@ -97,7 +97,7 @@ if __name__ == '__main__':
     #show_img(images_show,titles_show)
     #print(x_test[6020])
     #print(x_test[6020])
-    show_img([x_train[0]],["Binary"])
-
+    show_img([x_train[0]],["Grayscale"])
+ 
 """
 """
