@@ -61,3 +61,14 @@ Their accuracy with test data:
 98.61% accuracy with grayscale data 
 
 For the drawing interface, you would assume SCNN1 (the grayscale one) would be better, but it's the opposite. SCNN2 outperformed SCNN1. SCNN1 got 60% accuracy and SCNN2 got 64% accuracy.
+
+# Source
+For the CNN I used these as sources:
+
+https://victorzhou.com/blog/intro-to-cnns-part-2/
+https://www.quarkml.com/2023/07/backward-pass-in-convolutional-neural-network-explained
+
+For the SCNN (PyTorch):
+https://docs.pytorch.org/tutorials/beginner/basics/
+https://medium.com/@noel.benji/breaking-down-backpropagation-in-pytorch-3762ea107d3a
+https://medium.com/data-scientists-diary/advanced-guide-to-using-nn-modulelist-in-pytorch-da4d49c109fc
