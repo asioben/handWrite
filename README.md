@@ -17,11 +17,11 @@ I will test all these models in a drawing interface.
 </p>
 
 ## Data type
-I used two types of data. One grayscale and one binary. First, for both of them we have a vector of 784 numbers, each representing the level of darkness of a pixel.
+I used two types of data, grayscale and binary. First, for both of them we have a vector of 784 numbers. Each number represent the level of darkness of a pixel (0 to 255)
 
 ### Binary
-NN and CNN were trained on them because I made for a hypothesis that NN and CNN would perform better againt the drawing interface, if their data of training have the same type of data as the drawing grid vector.
-Binary data are like boolean data. If the pixel originally have a number higher than 0, it's new value is 1.
+Binary data are like boolean data. If the pixel originally have a number higher than 0, its new value is 1.
+I use binary data to train the NN, CNN and SCNN1. I did that because I made the assumption that these models would perform better on the drawing interface. The reason I made that assumption is that the input for the drawing interface and the training data both have boolean value for their pixel.
 
 <p align="center">
   <img src ="assets/binary_example.png" width="500" alt="binary example">
@@ -29,7 +29,7 @@ Binary data are like boolean data. If the pixel originally have a number higher 
 
 
 ### Grayscale
-Grayscale is a float. The number the pixel can get is between 0 and 1, depending how dark the pixel is. I just normalized the value of the pixel. It's more rich in information than the binary one.
+Grayscale is a float. The value the pixel can get is between 0 and 1, depending how dark the pixel is. I just normalized the value of the pixel. It's richer in information than binary. I used it to train SCNN2.
 
 <p align="center">
   <img src ="assets/grayscale_example.png" width="500" alt="grayscale example">
@@ -46,7 +46,7 @@ For the Convolutional Neural Network, I used NumPy. I made the filter calculatio
 
 ### Convolutional Neural Network with PyTorch
 I made two Convolutional Neural Networks with PyTorch, I called them SCNN1 and SCNN2. SCNN stands for Super Convolutional Neural Network.
-PyTorch accelerate the training. In this model, the image goes trough the filters, reLU, and then the pool (Maxpool). I trained two networks with two type of the same data, one binary and the other one grayscale.
+PyTorch accelerate the training. In this model, the image goes trough the filters, reLU, and then the pool (Maxpool). I trained two networks with two types of the same data, one binary and the other one grayscale.
 Their accuracy with test data:
 
 #### The binary model: 
